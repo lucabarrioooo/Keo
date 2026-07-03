@@ -4,8 +4,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Keo">
 <meta name="theme-color" content="#EFEDE4">
 <title>Keo</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:wght@400;500;600&display=swap">
@@ -145,7 +149,7 @@
   }
 
   .who-row {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
     margin: 10px 0 0;
   }
   .who-label {
@@ -153,12 +157,12 @@
     text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0;
   }
   .who-segment {
-    display: inline-flex; background: var(--surface); border-radius: 10px;
+    display: flex; flex: 1; max-width: 320px; background: var(--surface); border-radius: 12px;
     padding: 3px; gap: 2px; border: 1px solid var(--border);
   }
   .who-btn {
-    background: transparent; border: none; padding: 6px 14px;
-    border-radius: 7px; font-family: inherit; font-size: 12px; font-weight: 600;
+    flex: 1; background: transparent; border: none; padding: 12px 0; min-height: 44px;
+    border-radius: 9px; font-family: inherit; font-size: 14px; font-weight: 600;
     color: var(--text-secondary); cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: -0.01em;
   }
@@ -246,8 +250,8 @@
   .footer { margin-top: 24px; display: flex; justify-content: center; gap: 4px; }
   .footer-btn {
     background: transparent; border: none; color: var(--accent);
-    font-family: inherit; font-size: 14px; font-weight: 500;
-    cursor: pointer; padding: 10px 14px; border-radius: 10px; letter-spacing: -0.01em;
+    font-family: inherit; font-size: 14px; font-weight: 500; min-height: 44px;
+    cursor: pointer; padding: 12px 16px; border-radius: 10px; letter-spacing: -0.01em;
   }
   .footer-btn:active { background: var(--surface); }
 
@@ -261,11 +265,30 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .toast-action {
+    background: transparent; border: none; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    color: #E8A188; padding: 8px 6px 8px 10px; margin: -8px -6px -8px 0;
+    letter-spacing: -0.01em;
   }
   @media (prefers-color-scheme: dark) {
     .toast { background: rgba(255, 255, 255, 0.92); color: #000; }
+    .toast-action { color: #A94F31; }
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Skeleton mientras carga el primer sync (sin caché) */
+  .meal-status.loading { color: var(--text-tertiary); animation: statusPulse 1.2s ease-in-out infinite; }
+  @keyframes statusPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  /* Modal "Novedades" */
+  .wn-list { display: flex; flex-direction: column; gap: 16px; margin: 6px 0 24px; }
+  .wn-item { display: flex; gap: 12px; align-items: flex-start; }
+  .wn-icon { font-size: 20px; line-height: 1.3; flex-shrink: 0; }
+  .wn-body { font-size: 14.5px; line-height: 1.45; color: var(--text-secondary); }
+  .wn-body strong { color: var(--text); font-weight: 600; }
 
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4);
@@ -304,6 +327,19 @@
   }
   .modal-btn:active { transform: scale(0.97); }
   .modal-btn.danger { background: var(--red); color: white; }
+  .modal-btn.primary { background: var(--accent); color: white; }
+
+  .edit-label {
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 8px;
+  }
+  .edit-who-row { width: 100%; max-width: none; }
+  .edit-time-input {
+    width: 100%; font-family: inherit; font-size: 17px; font-weight: 600;
+    padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); letter-spacing: -0.01em;
+  }
+  .edit-time-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
@@ -493,6 +529,8 @@
   .cal-daynum { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .cal-cell.today .cal-daynum { color: var(--accent); }
   .cal-slot { display: flex; align-items: center; gap: 4px; font-size: 10px; line-height: 1; }
+  .cal-slot-tap { cursor: pointer; padding: 3px 5px; margin: -3px -5px; border-radius: 8px; transition: background 0.15s ease; }
+  .cal-slot-tap:active { background: var(--surface-2); }
   .cal-dash { color: var(--text-tertiary); font-size: 12px; }
   .ico-sm { width: 12px; height: 12px; flex-shrink: 0; color: var(--text-tertiary); }
   .ico-sm.sun { color: var(--orange); }
@@ -619,11 +657,55 @@
 <div class="modal-overlay" id="modalUndo">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Desmarcar comida</div>
+    <div class="modal-title">Comida registrada</div>
     <div class="modal-text" id="modalUndoText"></div>
+    <div class="modal-actions" style="margin-bottom: 10px;">
+      <button class="modal-btn primary" id="btnEditFromUndo">Editar</button>
+    </div>
     <div class="modal-actions">
       <button class="modal-btn" onclick="closeModal('modalUndo')">Cancelar</button>
       <button class="modal-btn danger" id="btnUndoConfirm">Desmarcar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalEdit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar registro</div>
+    <div class="modal-text" id="modalEditText"></div>
+    <div class="edit-label">Quién le dio de comer</div>
+    <div class="who-segment edit-who-row" id="editWhoButtons"></div>
+    <div class="edit-label">Horario</div>
+    <input type="time" class="edit-time-input" id="editTimeInput">
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="modal-btn" onclick="closeModal('modalEdit')">Cancelar</button>
+      <button class="modal-btn primary" id="btnEditConfirm">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalWhatsNew">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Novedades 🐾</div>
+    <div class="modal-text">La app de Keo tiene cosas nuevas:</div>
+    <div class="wn-list">
+      <div class="wn-item">
+        <div class="wn-icon">✏️</div>
+        <div class="wn-body"><strong>Editar registros.</strong> Tocá una comida ya marcada, o los círculos del calendario en "Mes", para cambiar el horario o quién le dio de comer.</div>
+      </div>
+      <div class="wn-item">
+        <div class="wn-icon">↩️</div>
+        <div class="wn-body"><strong>Deshacer rápido.</strong> Al marcar una comida, el aviso de abajo trae un botón "Deshacer" por si te equivocaste.</div>
+      </div>
+      <div class="wn-item">
+        <div class="wn-icon">📱</div>
+        <div class="wn-body"><strong>Ícono nuevo.</strong> Si tenés la app en tu pantalla de inicio, borrala y volvela a agregar para ver la carita de Keo.</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" id="btnWhatsNewOk">¡Buenísimo!</button>
     </div>
   </div>
 </div>
@@ -658,6 +740,7 @@ let state = {
   currentUser: null,
   records: [],
   lastSync: 0,
+  firstSyncDone: false, // true cuando hay datos confiables (caché o primer sync)
   isBusy: { manana: false, noche: false }
 };
 
@@ -693,7 +776,10 @@ function loadLocal() {
   } catch (e) {}
   try {
     const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) state.records = JSON.parse(cached);
+    if (cached) {
+      state.records = JSON.parse(cached);
+      if (state.records.length > 0) state.firstSyncDone = true;
+    }
   } catch (e) {}
 }
 
@@ -714,6 +800,7 @@ async function syncFromServer(silent = false) {
     const records = await apiGet();
     state.records = records;
     state.lastSync = Date.now();
+    state.firstSyncDone = true;
     saveCache();
     renderAll();
     setSyncStatus('ok', 'Actualizado');
@@ -792,10 +879,17 @@ function renderMeal(meal) {
 
   card.classList.toggle('busy', state.isBusy[meal]);
 
+  status.classList.remove('loading');
   if (record) {
     card.classList.add('done');
     status.textContent = record.who + ' · ' + formatTime(record.timestamp);
     btn.textContent = 'Tocar para deshacer';
+  } else if (!state.firstSyncDone) {
+    // Primer carga sin caché: no afirmar "Aún no comió" hasta tener datos
+    card.classList.remove('done');
+    status.textContent = 'Cargando…';
+    status.classList.add('loading');
+    btn.textContent = 'Marcar como dado';
   } else {
     card.classList.remove('done');
     status.textContent = 'Aún no comió';
@@ -989,7 +1083,7 @@ function buildDayMap(records) {
   const map = {};
   records.forEach(r => {
     if (!map[r.dateKey]) map[r.dateKey] = {};
-    map[r.dateKey][r.meal] = r.who;
+    map[r.dateKey][r.meal] = r; // registro completo (who + timestamp), para poder editarlo
   });
   return map;
 }
@@ -1017,16 +1111,89 @@ function renderCalendar() {
     const rec = map[key] || {};
     const isToday = key === todayKey;
     const isFuture = key > todayKey;
-    const slotM = rec.manana ? userCircleHTML(rec.manana, 16) : '<span class="cal-dash">—</span>';
-    const slotN = rec.noche ? userCircleHTML(rec.noche, 16) : '<span class="cal-dash">—</span>';
+    const slotM = rec.manana
+      ? '<div class="cal-slot cal-slot-tap" data-date="' + key + '" data-meal="manana">' + ICON_SUN + userCircleHTML(rec.manana.who, 16) + '</div>'
+      : '<div class="cal-slot">' + ICON_SUN + '<span class="cal-dash">—</span></div>';
+    const slotN = rec.noche
+      ? '<div class="cal-slot cal-slot-tap" data-date="' + key + '" data-meal="noche">' + ICON_MOON + userCircleHTML(rec.noche.who, 16) + '</div>'
+      : '<div class="cal-slot">' + ICON_MOON + '<span class="cal-dash">—</span></div>';
     cells += '<div class="cal-cell' + (isToday ? ' today' : '') + (isFuture ? ' future' : '') + '">' +
       '<div class="cal-daynum">' + d + '</div>' +
-      '<div class="cal-slot">' + ICON_SUN + slotM + '</div>' +
-      '<div class="cal-slot">' + ICON_MOON + slotN + '</div>' +
+      slotM +
+      slotN +
     '</div>';
   }
   document.getElementById('calGrid').innerHTML = cells;
 }
+
+// Tocar un día ya registrado en el calendario abre el editor
+document.getElementById('calGrid').addEventListener('click', (e) => {
+  const slot = e.target.closest('.cal-slot-tap');
+  if (!slot) return;
+  const dateKey = slot.dataset.date;
+  const meal = slot.dataset.meal;
+  const rec = buildDayMap(state.records)[dateKey];
+  const existing = rec && rec[meal];
+  if (!existing) return;
+  openEditModal(dateKey, meal, existing);
+});
+
+// ==================== EDITAR REGISTRO ====================
+let editContext = null;
+let editSelectedWho = null;
+
+function renderEditWhoButtons() {
+  const container = document.getElementById('editWhoButtons');
+  container.innerHTML = '';
+  NAMES.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'who-btn' + (name === editSelectedWho ? ' active' : '');
+    btn.textContent = name;
+    btn.onclick = () => { editSelectedWho = name; renderEditWhoButtons(); };
+    container.appendChild(btn);
+  });
+}
+
+function openEditModal(dateKey, meal, existing) {
+  editContext = { dateKey, meal };
+  editSelectedWho = existing.who;
+  renderEditWhoButtons();
+
+  const mealLabel = meal === 'manana' ? 'Mañana' : 'Noche';
+  const dayLabel = dateKey === getDateKey()
+    ? 'hoy'
+    : new Date(dateKey + 'T00:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+  document.getElementById('modalEditText').textContent = mealLabel + ' · ' + dayLabel;
+
+  const d = new Date(Number(existing.timestamp));
+  document.getElementById('editTimeInput').value =
+    String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+
+  openModal('modalEdit');
+}
+
+document.getElementById('btnEditConfirm').onclick = async () => {
+  if (!editContext) return;
+  const { dateKey, meal } = editContext;
+  const timeVal = document.getElementById('editTimeInput').value;
+  if (!timeVal) { showToast('Elegí un horario'); return; }
+  if (!editSelectedWho) { showToast('Elegí quién le dio de comer'); return; }
+
+  const [hh, mm] = timeVal.split(':').map(Number);
+  const d = new Date(dateKey + 'T00:00:00');
+  d.setHours(hh, mm, 0, 0);
+
+  closeModal('modalEdit');
+  setSyncStatus('syncing', 'Guardando…');
+  try {
+    await apiPost({ action: 'edit', dateKey, meal, timestamp: d.getTime(), who: editSelectedWho });
+    await syncFromServer(true);
+    showToast('Registro actualizado');
+  } catch (err) {
+    showToast('Error al editar');
+    setSyncStatus('error', 'Error');
+  }
+};
 
 // ==================== AVATAR REACTIVO DE KEO ====================
 // Antes de la hora de corte mira el desayuno; después, la cena.
@@ -1073,11 +1240,24 @@ function renderAll() {
   if (document.getElementById('tab-mes').style.display !== 'none') renderCalendar();
 }
 
-function showToast(msg) {
+let toastTimer = null;
+function showToast(msg, actionLabel, actionFn) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
+  t.innerHTML = '';
+  const span = document.createElement('span');
+  span.textContent = msg;
+  t.appendChild(span);
+  if (actionLabel && actionFn) {
+    const b = document.createElement('button');
+    b.className = 'toast-action';
+    b.textContent = actionLabel;
+    b.onclick = () => { clearTimeout(toastTimer); t.classList.remove('show'); actionFn(); };
+    t.appendChild(b);
+  }
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  clearTimeout(toastTimer);
+  // Con acción damos más tiempo para reaccionar
+  toastTimer = setTimeout(() => t.classList.remove('show'), actionLabel ? 5000 : 2200);
 }
 
 function openModal(id) { document.getElementById(id).classList.add('show'); }
@@ -1112,6 +1292,10 @@ async function markMeal(meal) {
     setSyncStatus('hidden');
     document.getElementById('modalUndoText').textContent =
       existing.who + ' marcó la comida de ' + (meal === 'manana' ? 'la mañana' : 'la noche') + ' a las ' + formatTime(existing.timestamp) + '.';
+    document.getElementById('btnEditFromUndo').onclick = () => {
+      closeModal('modalUndo');
+      openEditModal(getDateKey(), meal, existing);
+    };
     document.getElementById('btnUndoConfirm').onclick = async () => {
       closeModal('modalUndo');
       state.isBusy[meal] = true;
@@ -1160,7 +1344,17 @@ async function markMeal(meal) {
     saveCache();
     renderAll();
     if (navigator.vibrate) navigator.vibrate(10);
-    showToast((meal === 'manana' ? 'Mañana' : 'Noche') + ' registrada');
+    showToast((meal === 'manana' ? 'Mañana' : 'Noche') + ' registrada', 'Deshacer', async () => {
+      setSyncStatus('syncing', 'Deshaciendo…');
+      try {
+        await apiPost({ action: 'delete', timestamp: record.timestamp, meal: record.meal, who: record.who });
+        await syncFromServer(true);
+        showToast('Deshecho');
+      } catch (err) {
+        showToast('Error al deshacer');
+        setSyncStatus('error', 'Error');
+      }
+    });
     setSyncStatus('ok', 'Guardado');
     setTimeout(() => setSyncStatus('hidden'), 1500);
   } catch (err) {
@@ -1246,6 +1440,16 @@ window.addEventListener('load', () => {
   document.querySelectorAll('.hero, .meal, .history-card, .who-segment, .tab-bar, .tab-section')
     .forEach(el => { el.style.animation = 'none'; });
 });
+
+// ==================== NOVEDADES (una sola vez por dispositivo) ====================
+const WHATSNEW_KEY = 'keo-whatsnew-2026-07';
+document.getElementById('btnWhatsNewOk').onclick = () => closeModal('modalWhatsNew');
+try {
+  if (!localStorage.getItem(WHATSNEW_KEY)) {
+    localStorage.setItem(WHATSNEW_KEY, '1'); // marcar al mostrar, así no reaparece si cierran tocando afuera
+    setTimeout(() => openModal('modalWhatsNew'), 800);
+  }
+} catch (e) {}
 
 // Init
 loadLocal();
