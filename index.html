@@ -223,11 +223,22 @@
     cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .btn-feed:active { transform: scale(0.97); background: var(--accent-press); }
-  .meal.done .btn-feed {
-    background: transparent; color: var(--text-secondary);
-    font-size: 13px; font-weight: 500; padding: 10px;
+  .meal.done .btn-feed { display: none; }
+
+  /* Acciones sobre una comida ya marcada (Editar / Deshacer) */
+  .meal-actions { display: none; gap: 8px; }
+  .meal.done .meal-actions { display: flex; }
+  .meal-action-btn {
+    flex: 1; min-height: 44px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--text-secondary); font-family: inherit;
+    font-size: 14px; font-weight: 600; letter-spacing: -0.01em; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .meal.done .btn-feed:active { background: var(--surface-2); transform: scale(0.98); }
+  .meal-action-btn svg { width: 16px; height: 16px; }
+  .meal-action-btn.edit { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+  .meal-action-btn:active { transform: scale(0.97); background: var(--surface); }
 
   .history-card {
     background: var(--surface); border-radius: 16px;
@@ -588,6 +599,13 @@
       </div>
     </div>
     <button class="btn-feed" data-meal="manana">Marcar como dado</button>
+    <div class="meal-actions">
+      <button class="meal-action-btn edit" data-act="edit" data-meal="manana">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        Editar
+      </button>
+      <button class="meal-action-btn undo" data-act="undo" data-meal="manana">Deshacer</button>
+    </div>
   </div>
 
   <div class="meal" id="card-noche">
@@ -610,6 +628,13 @@
       </div>
     </div>
     <button class="btn-feed" data-meal="noche">Marcar como dado</button>
+    <div class="meal-actions">
+      <button class="meal-action-btn edit" data-act="edit" data-meal="noche">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        Editar
+      </button>
+      <button class="meal-action-btn undo" data-act="undo" data-meal="noche">Deshacer</button>
+    </div>
   </div>
 </div>
 
@@ -654,21 +679,6 @@
 
 <div class="toast" id="toast"></div>
 
-<div class="modal-overlay" id="modalUndo">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Comida registrada</div>
-    <div class="modal-text" id="modalUndoText"></div>
-    <div class="modal-actions" style="margin-bottom: 10px;">
-      <button class="modal-btn primary" id="btnEditFromUndo">Editar</button>
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn" onclick="closeModal('modalUndo')">Cancelar</button>
-      <button class="modal-btn danger" id="btnUndoConfirm">Desmarcar</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="modalEdit">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -692,16 +702,16 @@
     <div class="modal-text">La app de Keo tiene cosas nuevas:</div>
     <div class="wn-list">
       <div class="wn-item">
+        <div class="wn-icon">⚡</div>
+        <div class="wn-body"><strong>Mucho más rápida.</strong> Marcar, deshacer y editar ahora se ven al instante, sin esperar a que cargue.</div>
+      </div>
+      <div class="wn-item">
         <div class="wn-icon">✏️</div>
-        <div class="wn-body"><strong>Editar registros.</strong> Tocá una comida ya marcada, o los círculos del calendario en "Mes", para cambiar el horario o quién le dio de comer.</div>
+        <div class="wn-body"><strong>Editar más fácil.</strong> Cada comida marcada ahora muestra los botones <strong>Editar</strong> y <strong>Deshacer</strong> bien a la vista. También podés editar desde el calendario en "Mes".</div>
       </div>
       <div class="wn-item">
-        <div class="wn-icon">↩️</div>
-        <div class="wn-body"><strong>Deshacer rápido.</strong> Al marcar una comida, el aviso de abajo trae un botón "Deshacer" por si te equivocaste.</div>
-      </div>
-      <div class="wn-item">
-        <div class="wn-icon">📱</div>
-        <div class="wn-body"><strong>Ícono nuevo.</strong> Si tenés la app en tu pantalla de inicio, borrala y volvela a agregar para ver la carita de Keo.</div>
+        <div class="wn-icon">🐾</div>
+        <div class="wn-body"><strong>Anti doble-comida.</strong> Si dos marcan casi al mismo tiempo, la app se da cuenta y avisa quién le dio primero.</div>
       </div>
     </div>
     <div class="modal-actions">
@@ -794,7 +804,13 @@ function saveCache() {
 }
 
 // ==================== SYNC ====================
+// Cuenta de escrituras optimistas en vuelo. Mientras haya alguna, el auto-sync
+// silencioso no pisa el estado local (evita que un registro recién marcado
+// desaparezca y reaparezca mientras el POST todavía está viajando).
+let pendingWrites = 0;
+
 async function syncFromServer(silent = false) {
+  if (silent && pendingWrites > 0) return false;
   if (!silent) setSyncStatus('syncing', 'Sincronizando…');
   try {
     const records = await apiGet();
@@ -883,7 +899,6 @@ function renderMeal(meal) {
   if (record) {
     card.classList.add('done');
     status.textContent = record.who + ' · ' + formatTime(record.timestamp);
-    btn.textContent = 'Tocar para deshacer';
   } else if (!state.firstSyncDone) {
     // Primer carga sin caché: no afirmar "Aún no comió" hasta tener datos
     card.classList.remove('done');
@@ -1182,16 +1197,33 @@ document.getElementById('btnEditConfirm').onclick = async () => {
   const [hh, mm] = timeVal.split(':').map(Number);
   const d = new Date(dateKey + 'T00:00:00');
   d.setHours(hh, mm, 0, 0);
+  const newTs = d.getTime();
 
   closeModal('modalEdit');
+
+  // Optimistic: aplicar el cambio local al instante y poder revertir si falla.
+  const rec = state.records.find(r => r.dateKey === dateKey && r.meal === meal);
+  const backup = rec ? { timestamp: rec.timestamp, who: rec.who } : null;
+  if (rec) { rec.timestamp = newTs; rec.who = editSelectedWho; }
+  saveCache();
+  renderAll();
+
+  pendingWrites++;
   setSyncStatus('syncing', 'Guardando…');
   try {
-    await apiPost({ action: 'edit', dateKey, meal, timestamp: d.getTime(), who: editSelectedWho });
-    await syncFromServer(true);
+    await apiPost({ action: 'edit', dateKey, meal, timestamp: newTs, who: editSelectedWho });
+    state.lastSync = Date.now();
+    setSyncStatus('ok', 'Guardado');
+    setTimeout(() => setSyncStatus('hidden'), 1200);
     showToast('Registro actualizado');
   } catch (err) {
-    showToast('Error al editar');
-    setSyncStatus('error', 'Error');
+    if (rec && backup) { rec.timestamp = backup.timestamp; rec.who = backup.who; }
+    saveCache();
+    renderAll();
+    setSyncStatus('error', 'Sin conexión');
+    showToast('Error al editar. Probá de nuevo.');
+  } finally {
+    pendingWrites--;
   }
 };
 
@@ -1270,104 +1302,103 @@ async function markMeal(meal) {
     return;
   }
   if (state.isBusy[meal]) return;
+  if (getMealRecord(meal)) return; // ya está marcada
 
-  // Sincronizar primero para evitar duplicados (si otra persona ya marcó)
-  state.isBusy[meal] = true;
-  renderMeal(meal);
-  setSyncStatus('syncing', 'Verificando…');
-
-  const ok = await syncFromServer(true);
-  if (!ok) {
-    state.isBusy[meal] = false;
-    renderMeal(meal);
-    showToast('Sin conexión. Probá de nuevo.');
-    return;
-  }
-
-  const existing = getMealRecord(meal);
-
-  if (existing) {
-    state.isBusy[meal] = false;
-    renderMeal(meal);
-    setSyncStatus('hidden');
-    document.getElementById('modalUndoText').textContent =
-      existing.who + ' marcó la comida de ' + (meal === 'manana' ? 'la mañana' : 'la noche') + ' a las ' + formatTime(existing.timestamp) + '.';
-    document.getElementById('btnEditFromUndo').onclick = () => {
-      closeModal('modalUndo');
-      openEditModal(getDateKey(), meal, existing);
-    };
-    document.getElementById('btnUndoConfirm').onclick = async () => {
-      closeModal('modalUndo');
-      state.isBusy[meal] = true;
-      renderMeal(meal);
-      setSyncStatus('syncing', 'Borrando…');
-      try {
-        await apiPost({
-          action: 'delete',
-          timestamp: existing.timestamp,
-          meal: existing.meal,
-          who: existing.who
-        });
-        await syncFromServer(true);
-        showToast('Desmarcado');
-      } catch (err) {
-        showToast('Error al desmarcar');
-        setSyncStatus('error', 'Error');
-      } finally {
-        state.isBusy[meal] = false;
-        renderMeal(meal);
-      }
-    };
-    openModal('modalUndo');
-    return;
-  }
-
-  // Crear registro
   const record = {
-    action: 'add',
     timestamp: Date.now(),
     dateKey: getDateKey(),
     meal: meal,
     who: state.currentUser
   };
 
+  // Optimistic: se ve marcada al instante, sin esperar al server.
+  state.records.push(record);
+  saveCache();
+  renderAll();
+  if (navigator.vibrate) navigator.vibrate(10);
+
+  pendingWrites++;
   setSyncStatus('syncing', 'Guardando…');
   try {
-    await apiPost(record);
-    // Optimistic update local + resync
-    state.records.push({
-      timestamp: record.timestamp,
-      dateKey: record.dateKey,
-      meal: record.meal,
-      who: record.who
-    });
+    const res = await apiPost({ action: 'add', ...record });
+
+    if (res.duplicate && res.record) {
+      // Otra persona marcó primero (chequeo atómico en el backend):
+      // reemplazar nuestro registro optimista por el real del server.
+      state.records = state.records.filter(r =>
+        !(r.dateKey === record.dateKey && r.meal === record.meal && r.timestamp === record.timestamp));
+      state.records.push(res.record);
+      saveCache();
+      renderAll();
+      setSyncStatus('hidden');
+      showToast(res.record.who !== record.who
+        ? 'Ya lo había marcado ' + res.record.who
+        : (meal === 'manana' ? 'Mañana' : 'Noche') + ' ya estaba registrada');
+      return;
+    }
+
+    state.lastSync = Date.now();
+    setSyncStatus('ok', 'Guardado');
+    setTimeout(() => setSyncStatus('hidden'), 1200);
+    showToast((meal === 'manana' ? 'Mañana' : 'Noche') + ' registrada', 'Deshacer', () => undoMeal(meal));
+  } catch (err) {
+    // Revertir el optimistic si falló la red.
+    state.records = state.records.filter(r =>
+      !(r.dateKey === record.dateKey && r.meal === record.meal && r.timestamp === record.timestamp));
     saveCache();
     renderAll();
-    if (navigator.vibrate) navigator.vibrate(10);
-    showToast((meal === 'manana' ? 'Mañana' : 'Noche') + ' registrada', 'Deshacer', async () => {
-      setSyncStatus('syncing', 'Deshaciendo…');
-      try {
-        await apiPost({ action: 'delete', timestamp: record.timestamp, meal: record.meal, who: record.who });
-        await syncFromServer(true);
-        showToast('Deshecho');
-      } catch (err) {
-        showToast('Error al deshacer');
-        setSyncStatus('error', 'Error');
-      }
-    });
-    setSyncStatus('ok', 'Guardado');
-    setTimeout(() => setSyncStatus('hidden'), 1500);
-  } catch (err) {
-    showToast('Error al guardar');
-    setSyncStatus('error', 'Error');
+    setSyncStatus('error', 'Sin conexión');
+    showToast('Error al guardar. Probá de nuevo.');
   } finally {
-    state.isBusy[meal] = false;
-    renderMeal(meal);
+    pendingWrites--;
   }
+}
+
+async function undoMeal(meal) {
+  const rec = getMealRecord(meal);
+  if (!rec) return;
+
+  // Optimistic: sacarla al instante.
+  state.records = state.records.filter(r => !(r.dateKey === rec.dateKey && r.meal === rec.meal));
+  saveCache();
+  renderAll();
+
+  pendingWrites++;
+  setSyncStatus('syncing', 'Deshaciendo…');
+  try {
+    await apiPost({ action: 'delete', timestamp: rec.timestamp, meal: rec.meal, who: rec.who });
+    state.lastSync = Date.now();
+    setSyncStatus('ok', 'Deshecho');
+    setTimeout(() => setSyncStatus('hidden'), 1200);
+    showToast('Deshecho');
+  } catch (err) {
+    // Revertir.
+    state.records.push(rec);
+    saveCache();
+    renderAll();
+    setSyncStatus('error', 'Sin conexión');
+    showToast('Error al deshacer. Probá de nuevo.');
+  } finally {
+    pendingWrites--;
+  }
+}
+
+function editMealToday(meal) {
+  const rec = getMealRecord(meal);
+  if (!rec) return;
+  openEditModal(getDateKey(), meal, rec);
 }
 
 document.querySelectorAll('.btn-feed').forEach(btn => {
   btn.addEventListener('click', () => markMeal(btn.dataset.meal));
+});
+
+document.querySelectorAll('.meal-action-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const meal = btn.dataset.meal;
+    if (btn.dataset.act === 'edit') editMealToday(meal);
+    else undoMeal(meal);
+  });
 });
 
 document.getElementById('btnRefresh').onclick = () => syncFromServer();
@@ -1442,7 +1473,7 @@ window.addEventListener('load', () => {
 });
 
 // ==================== NOVEDADES (una sola vez por dispositivo) ====================
-const WHATSNEW_KEY = 'keo-whatsnew-2026-07';
+const WHATSNEW_KEY = 'keo-whatsnew-2026-09';
 document.getElementById('btnWhatsNewOk').onclick = () => closeModal('modalWhatsNew');
 try {
   if (!localStorage.getItem(WHATSNEW_KEY)) {
