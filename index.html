@@ -30,6 +30,11 @@
     --orange: #C58A3C;
     --red: #D0402E;
     --indigo: #5E7A93;
+    /* Identidad de cada persona (círculos y gráficos) + color de la inicial.
+       Validado con dataviz/validate_palette (--pairs all, light #FFF y dark #1C1C1E):
+       peor ΔE daltonismo 8.8, visión normal 22.7, contraste ≥3:1 en ambos modos. */
+    --u-luca: #B0502F; --u-joaco: #509F62; --u-toty: #3F63C4;
+    --u-luca-ink: #fff; --u-joaco-ink: #fff; --u-toty-ink: #fff;
     --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
     --font-sans: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -73,7 +78,7 @@
   }
 
   body {
-    padding: max(24px, env(safe-area-inset-top)) 20px calc(96px + env(safe-area-inset-bottom));
+    padding: max(24px, env(safe-area-inset-top)) 20px calc(104px + env(safe-area-inset-bottom));
     max-width: 480px; margin: 0 auto;
   }
 
@@ -89,25 +94,21 @@
     font-size: 48px; font-weight: 500; letter-spacing: -0.025em; line-height: 0.95;
   }
 
-  /* Sync indicator */
+  /* Sync indicator + botón de actualizar (reemplaza al viejo footer "Actualizar") */
   .sync-indicator {
-    position: absolute; top: 16px; right: 4px;
+    position: absolute; top: 4px; right: -6px;
     display: flex; align-items: center; gap: 6px;
-    font-size: 11px; color: var(--text-secondary); font-weight: 500;
-    transition: opacity 0.3s ease; opacity: 0;
+    min-height: 44px; padding: 0 10px; border: none; background: transparent;
+    font-family: inherit; font-size: 12px; color: var(--text-secondary); font-weight: 500;
+    cursor: pointer; border-radius: 12px;
   }
-  .sync-indicator.visible { opacity: 1; }
-  .sync-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--text-tertiary);
-  }
-  .sync-indicator.syncing .sync-dot {
-    background: var(--accent);
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-  .sync-indicator.error .sync-dot { background: var(--red); }
-  .sync-indicator.ok .sync-dot { background: var(--green); }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .sync-indicator:active { background: var(--surface-2); }
+  #syncText { opacity: 0; transition: opacity 0.3s ease; }
+  .sync-indicator.visible #syncText { opacity: 1; }
+  .sync-icon { width: 17px; height: 17px; color: var(--text-tertiary); transition: color 0.3s ease; }
+  .sync-indicator.syncing .sync-icon { color: var(--accent); animation: spin 0.9s linear infinite; }
+  .sync-indicator.error .sync-icon { color: var(--red); }
+  .sync-indicator.ok .sync-icon { color: var(--green); }
 
   /* ==================== AVATAR REACTIVO DE KEO ==================== */
   .keo-avatar { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 2px 0 22px; }
@@ -261,17 +262,10 @@
   .history-line2 { font-size: 12px; color: var(--text-secondary); }
   .history-time { font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-  .footer { margin-top: 24px; display: flex; justify-content: center; gap: 4px; }
-  .footer-btn {
-    background: transparent; border: none; color: var(--accent);
-    font-family: inherit; font-size: 14px; font-weight: 500; min-height: 44px;
-    cursor: pointer; padding: 12px 16px; border-radius: 10px; letter-spacing: -0.01em;
-  }
-  .footer-btn:active { background: var(--surface); }
-
+  /* Toast arriba (tipo Dynamic Island): así nunca se encima con la nav de abajo */
   .toast {
-    position: fixed; bottom: calc(92px + env(safe-area-inset-bottom));
-    left: 50%; transform: translateX(-50%) translateY(120px);
+    position: fixed; top: calc(env(safe-area-inset-top) + 10px);
+    left: 50%; transform: translateX(-50%) translateY(calc(-100% - 60px));
     background: rgba(28, 28, 30, 0.92); color: white;
     padding: 12px 20px; border-radius: 100px;
     font-size: 14px; font-weight: 500; z-index: 100;
@@ -362,7 +356,6 @@
   #tab-hoy .keo-avatar,
   #tab-hoy .meals .meal,
   #tab-hoy .mini-score,
-  #tab-hoy .footer,
   #tab-hoy .who-row,
   .history-card {
     animation: fadeUp 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
@@ -371,8 +364,7 @@
   #tab-hoy .meals .meal:nth-child(1) { animation-delay: 0.18s; }
   #tab-hoy .meals .meal:nth-child(2) { animation-delay: 0.24s; }
   #tab-hoy .mini-score { animation-delay: 0.32s; }
-  #tab-hoy .footer { animation-delay: 0.40s; }
-  #tab-hoy .who-row { animation-delay: 0.46s; }
+  #tab-hoy .who-row { animation-delay: 0.40s; }
 
   /* Fallback: si las animaciones quedan pausadas (carga en 2.º plano), revertir al estado
      base visible. No afecta las animaciones decorativas (flotado de Keo, etc.). */
@@ -380,7 +372,6 @@
   body.content-ready #tab-hoy .keo-avatar,
   body.content-ready #tab-hoy .meals .meal,
   body.content-ready #tab-hoy .mini-score,
-  body.content-ready #tab-hoy .footer,
   body.content-ready .tab-bar,
   body.content-ready .history-card {
     animation: none;
@@ -395,13 +386,11 @@
 
   /* Micro-interacciones */
   .who-btn:active, .tab-btn:active { transform: scale(0.96); }
-  .footer-btn:active { transform: scale(0.95); }
   .lb-count { transition: transform 0.2s ease; }
   .cal-cell { transition: transform 0.2s ease, box-shadow 0.2s ease; }
   @media (hover: hover) {
     .meal:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .btn-feed:hover { background: var(--accent-press); }
-    .footer-btn:hover { background: var(--surface); }
     .who-btn:hover:not(.active), .tab-btn:hover:not(.active) { color: var(--text); }
     .cal-cell:not(.blank):hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .lb-item:hover .lb-count { transform: scale(1.05); }
@@ -423,18 +412,24 @@
   }
 
   /* ==================== BOTTOM NAV FLOTANTE ==================== */
+  /* Degradé detrás de la nav: el contenido se funde en vez de chocar contra la barra */
+  body::after {
+    content: ''; position: fixed; left: 0; right: 0; bottom: 0; z-index: 80;
+    height: calc(84px + env(safe-area-inset-bottom)); pointer-events: none;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 0%, transparent), var(--bg) 70%);
+  }
   .tab-bar {
     position: fixed;
-    bottom: max(16px, calc(env(safe-area-inset-bottom) + 6px));
+    bottom: max(14px, calc(env(safe-area-inset-bottom) + 4px));
     left: 50%; transform: translateX(-50%);
-    width: calc(100% - 40px); max-width: 440px;
+    width: calc(100% - 40px); max-width: 400px;
     z-index: 90;
-    display: flex; gap: 4px; padding: 6px;
-    background: color-mix(in srgb, var(--surface) 78%, transparent);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-radius: 22px; border: 1px solid var(--border);
-    box-shadow: var(--shadow-lg);
+    display: flex; gap: 2px; padding: 5px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 20px; border: 1px solid var(--border);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
     animation: navUp 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) backwards; animation-delay: 0.1s;
   }
   @keyframes navUp {
@@ -442,15 +437,14 @@
     to { opacity: 1; transform: translateX(-50%) translateY(0); }
   }
   .tab-btn {
-    flex: 1; background: transparent; border: none; padding: 12px 8px; min-height: 46px;
-    border-radius: 16px; font-family: inherit; font-size: 14.5px; font-weight: 600;
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    background: transparent; border: none; padding: 6px 2px 5px; min-height: 46px;
+    border-radius: 15px; font-family: inherit; font-size: 11px; font-weight: 600;
     color: var(--text-secondary); cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: -0.01em;
+    transition: color 0.2s ease, background 0.2s ease;
   }
-  .tab-btn.active {
-    background: var(--accent); color: #fff;
-    box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 36%, transparent);
-  }
+  .tab-btn svg { width: 21px; height: 21px; }
+  .tab-btn.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, transparent); }
   .tab-section { will-change: opacity, transform; }
 
   /* Círculo de usuario — consistente en widget, scoring y calendario */
@@ -488,23 +482,22 @@
     display: flex; flex-direction: column; gap: 14px; min-height: 106px;
     justify-content: space-between; transition: transform 0.2s ease;
   }
-  .stat-tile.leader {
-    background: var(--accent); border-color: transparent;
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 26%, transparent);
-  }
+  /* Líder en tile neutro (tinta invertida): el terracota se confundía con el color de Luca */
+  .stat-tile.leader { background: var(--text); border-color: transparent; box-shadow: var(--shadow-md); }
   .stat-tile.total { background: var(--surface-2); border-color: transparent; box-shadow: none; }
   .stat-tile-top { display: flex; align-items: center; gap: 8px; }
   .stat-tile-name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
-  .stat-tile.leader .stat-tile-name { color: #fff; }
+  .stat-tile.leader .stat-tile-name { color: var(--bg); }
+  /* En el tile del líder el círculo lleva un aro del color de fondo para despegarse */
+  .stat-tile.leader .user-circle, .rank-tile.leader .user-circle { box-shadow: 0 0 0 1.5px var(--bg); }
   .stat-tile-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; }
   .stat-tile-num {
     font-family: var(--font-serif); font-size: 38px; font-weight: 500; line-height: 0.82;
     font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
   }
-  .stat-tile.leader .stat-tile-num { color: #fff; }
-  .stat-tile.total .stat-tile-num { color: var(--accent); }
+  .stat-tile.leader .stat-tile-num { color: var(--bg); }
   .stat-tile-sub { font-size: 11.5px; color: var(--text-secondary); text-align: right; line-height: 1.3; font-variant-numeric: tabular-nums; }
-  .stat-tile.leader .stat-tile-sub { color: rgba(255, 255, 255, 0.85); }
+  .stat-tile.leader .stat-tile-sub { color: color-mix(in srgb, var(--bg) 78%, transparent); }
   /* Gráfico de barras del Ranking (apilado por persona) */
   .rank-chart {
     background: var(--surface); border-radius: 22px; padding: 18px 16px 14px;
@@ -513,16 +506,101 @@
   .chart-legend { display: flex; gap: 16px; margin-bottom: 16px; padding: 0 2px; flex-wrap: wrap; }
   .chart-leg-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); font-weight: 500; }
   .chart-leg-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-  .chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 118px; }
-  .chart-col { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
-  .chart-bar { width: 100%; max-width: 26px; display: flex; flex-direction: column-reverse; gap: 2px; }
-  .chart-seg { width: 100%; border-radius: 3px; transition: height 0.6s cubic-bezier(0.34, 1.2, 0.64, 1); }
-  .chart-bar.empty { height: 3px; border-radius: 3px; background: var(--surface-2); }
+  .rank-chart { position: relative; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 128px; border-bottom: 1px solid var(--separator); }
+  .chart-col {
+    flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    cursor: pointer; transition: opacity 0.2s ease;
+  }
+  /* Barras finas (≤22px), extremo redondeado 4px, cuadradas en la base, 2px de aire entre segmentos */
+  .chart-bar {
+    width: 100%; max-width: 22px; display: flex; flex-direction: column-reverse; gap: 2px;
+    transform-origin: bottom; animation: barGrow 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+    transition: filter 0.2s ease;
+  }
+  @keyframes barGrow { from { transform: scaleY(0); } }
+  .chart-seg { width: 100%; border-radius: 0; }
+  .chart-seg:last-child { border-radius: 4px 4px 0 0; }
+  .chart-bar.empty { height: 3px; border-radius: 3px 3px 0 0; background: var(--surface-2); animation: none; }
+  .chart-val {
+    font-size: 10.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;
+    font-variant-numeric: tabular-nums; animation: fadeIn 0.4s ease backwards;
+  }
+  @keyframes fadeIn { from { opacity: 0; } }
+  .chart-bars.has-on .chart-col:not(.on) { opacity: 0.4; }
+  .chart-col.on .chart-bar { filter: brightness(1.08) saturate(1.1); }
+  .chart-empty { padding: 34px 0; text-align: center; font-size: 14px; color: var(--text-secondary); }
+  /* Tooltip al tocar una barra */
+  .chart-tip {
+    position: absolute; top: 40px; transform: translateX(-50%); z-index: 5; pointer-events: none;
+    background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-md);
+    border-radius: 12px; padding: 9px 12px 8px; font-size: 12px; min-width: 112px;
+    animation: fadeIn 0.18s ease;
+  }
+  .chart-tip-title { font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; white-space: nowrap; }
+  .chart-tip-row { display: flex; align-items: center; gap: 7px; line-height: 1.65; color: var(--text-secondary); white-space: nowrap; }
+  .chart-tip-row b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 12px; }
+  .chart-tip-key { width: 10px; height: 2.5px; border-radius: 2px; flex-shrink: 0; }
+  .chart-tip-total { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--separator); font-weight: 600; color: var(--text); }
   .chart-labels { display: flex; gap: 5px; margin-top: 8px; }
   .chart-label { flex: 1; text-align: center; font-size: 10px; color: var(--text-tertiary); font-weight: 500; font-variant-numeric: tabular-nums; }
 
-  /* Selector de período del Ranking (segmented full-width) */
-  .rank-period { max-width: none; margin-bottom: 18px; }
+  /* Ranking: qué se mide (Comidas / Paseos) y en qué período (chips) */
+  .rank-metric { max-width: none; margin-bottom: 12px; }
+  .rank-metric .who-btn { display: flex; align-items: center; justify-content: center; gap: 7px; }
+  .rank-metric .who-btn svg { width: 17px; height: 17px; }
+  .period-chips { display: flex; gap: 8px; margin: 0 2px 18px; }
+  .chip {
+    min-height: 38px; padding: 0 16px; border-radius: 100px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary);
+    font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .chip.active { background: var(--text); color: var(--bg); border-color: transparent; }
+  .chip:active { transform: scale(0.96); }
+  #scoringContent { transition: opacity 0.3s ease; }
+  #scoringContent.refreshing { opacity: 0.75; }
+
+  /* Torta (donut) de reparto por persona */
+  .donut-card {
+    background: var(--surface); border-radius: 22px; padding: 17px 18px 16px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 14px;
+  }
+  .donut-title { font-size: 15.5px; font-weight: 600; letter-spacing: -0.015em; }
+  .donut-sub { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 14px; }
+  .donut-body { display: flex; align-items: center; gap: 20px; }
+  .donut-wrap { position: relative; width: 136px; height: 136px; flex-shrink: 0; }
+  .donut-svg {
+    width: 100%; height: 100%; transform: rotate(-90deg);
+    animation: donutIn 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  }
+  @keyframes donutIn { from { transform: rotate(-150deg) scale(0.86); opacity: 0; } }
+  .donut-track { fill: none; stroke: var(--surface-2); stroke-width: 14; }
+  .donut-seg {
+    fill: none; stroke-width: 14; cursor: pointer;
+    transition: stroke-dasharray 0.95s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.25s ease;
+  }
+  .donut-card.focus .donut-seg:not(.on) { opacity: 0.2; }
+  .donut-center {
+    position: absolute; inset: 0; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .donut-num { font-family: var(--font-serif); font-size: 38px; font-weight: 500; line-height: 0.9; letter-spacing: -0.015em; }
+  .donut-unit { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-top: 5px; }
+  .donut-legend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .dl-row {
+    display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 10px; margin: 0 -10px;
+    border: none; background: none; border-radius: 12px; font-family: inherit; color: var(--text);
+    cursor: pointer; text-align: left;
+    transition: background 0.2s ease, opacity 0.25s ease;
+    animation: fadeUp 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  }
+  .dl-row.on { background: var(--surface-2); }
+  .donut-card.focus .dl-row:not(.on) { opacity: 0.45; }
+  .dl-key { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .dl-name { flex: 1; font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; }
+  .dl-val { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .dl-pct { width: 38px; text-align: right; font-size: 12.5px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
   .rank-caption { font-size: 13px; font-weight: 500; color: var(--text-tertiary); margin: 0 4px 14px; letter-spacing: -0.01em; }
 
   /* Stat tiles del Ranking (estilo Gentler Streak) */
@@ -531,14 +609,11 @@
     box-shadow: var(--shadow-sm); border: 1px solid var(--border);
     display: flex; flex-direction: column; gap: 12px; min-height: 138px;
   }
-  .rank-tile.leader {
-    background: var(--accent); border-color: transparent;
-    box-shadow: 0 5px 18px color-mix(in srgb, var(--accent) 28%, transparent);
-  }
+  .rank-tile.leader { background: var(--text); border-color: transparent; box-shadow: var(--shadow-md); }
   .rank-tile.total { background: var(--surface-2); border-color: transparent; box-shadow: none; }
   .rank-tile-top { display: flex; align-items: center; gap: 8px; }
   .rank-tile-name { font-size: 14.5px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
-  .rank-tile.leader .rank-tile-name { color: #fff; }
+  .rank-tile.leader .rank-tile-name { color: var(--bg); }
   .rank-trend {
     margin-left: auto; display: inline-flex; align-items: center; gap: 2px;
     font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 100px;
@@ -547,18 +622,17 @@
   .rank-trend.up { color: var(--green); background: color-mix(in srgb, var(--green) 15%, transparent); }
   .rank-trend.down { color: var(--red); background: color-mix(in srgb, var(--red) 15%, transparent); }
   .rank-trend.flat { color: var(--text-tertiary); background: var(--surface-2); }
-  .rank-tile.leader .rank-trend { background: rgba(255, 255, 255, 0.22); color: #fff; }
+  .rank-tile.leader .rank-trend { background: color-mix(in srgb, var(--bg) 18%, transparent); color: var(--bg); }
   .rank-tile-body { display: flex; align-items: baseline; gap: 6px; margin-top: auto; }
   .rank-num {
     font-family: var(--font-serif); font-size: 46px; font-weight: 500; line-height: 0.78;
     font-variant-numeric: tabular-nums; letter-spacing: -0.015em;
   }
-  .rank-tile.leader .rank-num { color: #fff; }
-  .rank-tile.total .rank-num { color: var(--accent); }
+  .rank-tile.leader .rank-num { color: var(--bg); }
   .rank-unit { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
-  .rank-tile.leader .rank-unit { color: rgba(255, 255, 255, 0.82); }
+  .rank-tile.leader .rank-unit { color: color-mix(in srgb, var(--bg) 75%, transparent); }
   .rank-sub { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; letter-spacing: -0.005em; }
-  .rank-tile.leader .rank-sub { color: rgba(255, 255, 255, 0.82); }
+  .rank-tile.leader .rank-sub { color: color-mix(in srgb, var(--bg) 75%, transparent); }
 
   /* ==================== CALENDARIO (tab Mes) ==================== */
   .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
@@ -577,7 +651,7 @@
   }
   .cal-cell {
     background: var(--surface); border-radius: 13px; padding: 5px 2px 6px;
-    min-height: 60px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    min-height: 74px; display: flex; flex-direction: column; align-items: center; gap: 3px;
     box-shadow: var(--shadow-sm); border: 1px solid var(--border);
   }
   .cal-cell.blank { background: transparent; box-shadow: none; }
@@ -592,6 +666,105 @@
   .ico-sm { width: 12px; height: 12px; flex-shrink: 0; color: var(--text-tertiary); }
   .ico-sm.sun { color: var(--orange); }
   .ico-sm.moon { color: var(--indigo); }
+  .ico-sm.paw { color: var(--text-secondary); }
+  .cal-walk-n { font-size: 10.5px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .meal-status.warn { color: var(--orange); font-weight: 500; }
+
+  /* ==================== PASEOS ==================== */
+  .walk-card { margin-bottom: 14px; }
+  .walk-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .walk-stat {
+    background: var(--surface-2); border-radius: 16px; padding: 13px 15px 12px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .walk-stat-num { font-family: var(--font-serif); font-size: 36px; font-weight: 500; line-height: 0.85; letter-spacing: -0.015em; }
+  .walk-stat-label { font-size: 12.5px; font-weight: 500; color: var(--text-secondary); }
+  .meal-icon.walk { color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
+  .walk-card.has-walks .meal-icon.walk { background: var(--accent); color: #fff; }
+
+  .week-card {
+    background: var(--surface); border-radius: 22px; padding: 16px 14px 14px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 26px;
+  }
+  .week-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 2px 14px; }
+  .week-title { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+  .week-range { font-size: 13px; color: var(--text-secondary); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .week-nav { display: flex; gap: 6px; }
+  .week-nav button {
+    width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--accent); font-size: 18px; font-family: inherit; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .week-nav button:active { transform: scale(0.92); }
+  .week-nav button:disabled { opacity: 0.35; cursor: default; }
+
+  /* Tira semanal L–D: cada día muestra los círculos de quién lo sacó */
+  .wk-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .wk-day {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    background: none; border: none; padding: 0; font-family: inherit; color: inherit; cursor: pointer;
+  }
+  .wk-day:disabled { cursor: default; }
+  .wk-letter { font-size: 11px; font-weight: 600; color: var(--text-tertiary); }
+  .wk-track {
+    width: 100%; height: 96px; border-radius: 14px; background: var(--surface-2);
+    display: flex; flex-direction: column-reverse; align-items: center; gap: 4px; padding: 6px 0;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .wk-empty { width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); opacity: 0.45; margin-bottom: 4px; }
+  .wk-more {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--surface); color: var(--text-secondary);
+    font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+  .wk-num { font-size: 12px; font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .wk-day.today .wk-letter, .wk-day.today .wk-num { color: var(--accent); }
+  .wk-day.sel .wk-track {
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+  }
+  .wk-day.future { opacity: 0.35; }
+  .wk-day:not(:disabled):active .wk-track { transform: scale(0.95); }
+
+  .wk-sum {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--separator);
+  }
+  .wk-sum-item { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .wk-sum-item + .wk-sum-item { border-left: 1px solid var(--separator); }
+  .wk-sum-num { font-family: var(--font-serif); font-size: 30px; font-weight: 500; line-height: 0.9; font-variant-numeric: tabular-nums; }
+  /* Líder por contraste (tinta plena vs. atenuada), no por color */
+  .wk-sum-item .wk-sum-num { color: var(--text-secondary); }
+  .wk-sum-item.lead .wk-sum-num { color: var(--text); font-weight: 600; }
+  .wk-sum-name { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+
+  /* Lista de paseos del día elegido */
+  .walk-day-head { display: flex; align-items: center; justify-content: space-between; margin: 0 4px 6px; }
+  .walk-day-head .section-title { margin: 0; }
+  .walk-add-link {
+    background: none; border: none; font-family: inherit; font-size: 14px; font-weight: 600;
+    color: var(--accent); cursor: pointer; min-height: 44px; padding: 0 4px;
+  }
+  .walk-list {
+    background: var(--surface); border-radius: 20px; overflow: hidden;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+  }
+  .walk-row {
+    width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    background: none; border: none; border-bottom: 1px solid var(--separator);
+    font-family: inherit; color: inherit; text-align: left; cursor: pointer; min-height: 60px;
+  }
+  .walk-row:last-child { border-bottom: none; }
+  .walk-row:active { background: var(--surface-2); }
+  .walk-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .walk-row-name { font-size: 15.5px; font-weight: 600; letter-spacing: -0.01em; }
+  .walk-row-sub { font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .walk-row-edit { width: 17px; height: 17px; color: var(--text-tertiary); flex-shrink: 0; }
+  .walk-empty { padding: 22px 18px; text-align: center; font-size: 14px; color: var(--text-secondary); }
+  .modal-link-danger {
+    display: block; width: 100%; margin-top: 12px; background: none; border: none;
+    font-family: inherit; font-size: 15px; font-weight: 600; color: var(--red); min-height: 44px; cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -601,17 +774,30 @@
 <header>
   <div class="greeting" id="greeting">—</div>
   <h1 class="title">Keo</h1>
-  <div class="sync-indicator" id="syncIndicator">
-    <span class="sync-dot"></span>
-    <span id="syncText">Sincronizando…</span>
-  </div>
+  <button class="sync-indicator" id="syncIndicator" aria-label="Actualizar">
+    <span id="syncText"></span>
+    <svg class="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+  </button>
 </header>
 
-<div class="tab-bar" id="tabBar">
-  <button class="tab-btn active" data-tab="hoy">Hoy</button>
-  <button class="tab-btn" data-tab="scoring">Ranking</button>
-  <button class="tab-btn" data-tab="mes">Mes</button>
-</div>
+<nav class="tab-bar" id="tabBar">
+  <button class="tab-btn active" data-tab="hoy">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+    <span>Hoy</span>
+  </button>
+  <button class="tab-btn" data-tab="paseos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg>
+    <span>Paseos</span>
+  </button>
+  <button class="tab-btn" data-tab="scoring">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+    <span>Ranking</span>
+  </button>
+  <button class="tab-btn" data-tab="mes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg>
+    <span>Mes</span>
+  </button>
+</nav>
 
 <section class="tab-section" id="tab-hoy">
 
@@ -686,11 +872,6 @@
 
 <div class="mini-score" id="miniScore" data-comment-anchor="639fb98b20-div"></div>
 
-<div class="footer">
-  <button class="footer-btn" id="btnRefresh">Actualizar</button>
-  <button class="footer-btn" id="btnReset">Reiniciar día</button>
-</div>
-
 <div class="who-row">
   <span class="who-label">Sos</span>
   <div class="who-segment" id="whoButtons"></div>
@@ -698,16 +879,69 @@
 
 </section>
 
+<section class="tab-section" id="tab-paseos" style="display:none">
+  <div class="meal walk-card" id="walkCard">
+    <div class="meal-top">
+      <div class="meal-info">
+        <div class="meal-icon walk">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg>
+        </div>
+        <div class="meal-text">
+          <div class="meal-name">Paseos</div>
+          <div class="meal-status" id="walkTodayStatus">Todavía no salió hoy</div>
+        </div>
+      </div>
+    </div>
+    <div class="walk-stats">
+      <div class="walk-stat"><span class="walk-stat-num" id="walkTodayCount">0</span><span class="walk-stat-label">hoy</span></div>
+      <div class="walk-stat"><span class="walk-stat-num" id="walkWeekCount">0</span><span class="walk-stat-label">esta semana</span></div>
+    </div>
+    <button class="btn-feed" id="btnQuickWalk">Registrar paseo</button>
+  </div>
+
+  <div class="week-card">
+    <div class="week-head">
+      <div>
+        <div class="week-title" id="weekTitle">Esta semana</div>
+        <div class="week-range" id="weekRange">—</div>
+      </div>
+      <div class="week-nav">
+        <button id="weekPrev" aria-label="Semana anterior">‹</button>
+        <button id="weekNext" aria-label="Semana siguiente">›</button>
+      </div>
+    </div>
+    <div class="wk-strip" id="weekStrip"></div>
+    <div class="wk-sum" id="weekSummary"></div>
+  </div>
+
+  <div class="walk-day-head">
+    <div class="section-title" id="walkDayTitle">Hoy</div>
+    <button class="walk-add-link" id="btnAddWalkDay">+ Agregar</button>
+  </div>
+  <div class="walk-list" id="walkList"></div>
+</section>
+
 <section class="tab-section" id="tab-scoring" style="display:none">
-  <div class="who-segment rank-period" id="rankPeriod">
-    <button class="who-btn active" data-period="7">Semana</button>
-    <button class="who-btn" data-period="30">Mes</button>
-    <button class="who-btn" data-period="all">Todo</button>
+  <div class="who-segment rank-metric" id="rankMetric">
+    <button class="who-btn active" data-metric="meals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"></path><path d="M7 21h10"></path><path d="M19.5 12 22 6"></path><path d="M16.25 3c.27.1.8.53.75 1.36-.06.83-.93 1.2-1 2.02-.05.78.34 1.24.73 1.62"></path><path d="M11.25 3c.27.1.8.53.74 1.36-.05.83-.93 1.2-.98 2.02-.06.78.33 1.24.72 1.62"></path><path d="M6.25 3c.27.1.8.53.75 1.36-.06.83-.93 1.2-1 2.02-.05.78.34 1.24.74 1.62"></path></svg>
+      Comidas
+    </button>
+    <button class="who-btn" data-metric="walks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg>
+      Paseos
+    </button>
+  </div>
+  <div class="period-chips" id="rankPeriod">
+    <button class="chip active" data-period="7">Semana</button>
+    <button class="chip" data-period="30">Mes</button>
+    <button class="chip" data-period="all">Todo</button>
   </div>
   <div class="score-loading" id="scoringLoading">
     <span class="spinner"></span><span>Cargando…</span>
   </div>
   <div id="scoringContent" style="display:none">
+    <div id="rankDonut"></div>
     <div id="rankChart"></div>
     <div class="rank-caption" id="rankCaption"></div>
     <div class="mini-grid" id="rankGrid"></div>
@@ -748,16 +982,16 @@
     <div class="modal-text">La app de Keo tiene cosas nuevas:</div>
     <div class="wn-list">
       <div class="wn-item">
-        <div class="wn-icon">⚡</div>
-        <div class="wn-body"><strong>Mucho más rápida.</strong> Marcar, deshacer y editar ahora se ven al instante, sin esperar a que cargue.</div>
-      </div>
-      <div class="wn-item">
-        <div class="wn-icon">✏️</div>
-        <div class="wn-body"><strong>Editar más fácil.</strong> Cada comida marcada ahora muestra los botones <strong>Editar</strong> y <strong>Deshacer</strong> bien a la vista. También podés editar desde el calendario en "Mes".</div>
-      </div>
-      <div class="wn-item">
         <div class="wn-icon">🐾</div>
-        <div class="wn-body"><strong>Anti doble-comida.</strong> Si dos marcan casi al mismo tiempo, la app se da cuenta y avisa quién le dio primero.</div>
+        <div class="wn-body"><strong>Paseos.</strong> Nueva pestaña para anotar quién sacó a Keo. Ves la semana de un vistazo, con quién lo sacó cada día.</div>
+      </div>
+      <div class="wn-item">
+        <div class="wn-icon">📊</div>
+        <div class="wn-body"><strong>Estadísticas de paseos.</strong> En Ranking elegí <strong>Paseos</strong> para ver quién lo saca más por semana, mes o desde el inicio, con gráfico de torta.</div>
+      </div>
+      <div class="wn-item">
+        <div class="wn-icon">✨</div>
+        <div class="wn-body"><strong>Más limpia.</strong> La barra de abajo es más finita, los avisos aparecen arriba y cada uno tiene colores nuevos, más fáciles de distinguir. Para actualizar a mano, tocá el ícono <strong>↻</strong> de arriba a la derecha.</div>
       </div>
     </div>
     <div class="modal-actions">
@@ -766,35 +1000,45 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modalReset">
+<div class="modal-overlay" id="modalWalk">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">¿Reiniciar el día?</div>
-    <div class="modal-text">Se borrarán los registros de hoy. Esta acción no se puede deshacer.</div>
-    <div class="modal-actions">
-      <button class="modal-btn" onclick="closeModal('modalReset')">Cancelar</button>
-      <button class="modal-btn danger" id="btnResetConfirm">Reiniciar</button>
+    <div class="modal-title" id="modalWalkTitle">Registrar paseo</div>
+    <div class="modal-text" id="modalWalkText"></div>
+    <div class="edit-label">Quién lo sacó</div>
+    <div class="who-segment edit-who-row" id="walkWhoButtons"></div>
+    <div class="edit-label">Horario</div>
+    <input type="time" class="edit-time-input" id="walkTimeInput">
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="modal-btn" onclick="closeModal('modalWalk')">Cancelar</button>
+      <button class="modal-btn primary" id="btnWalkConfirm">Guardar</button>
     </div>
+    <button class="modal-link-danger" id="btnWalkDelete">Borrar paseo</button>
   </div>
 </div>
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbw-q4h9ANOU7ukbVHyt0sOE0zchup2YX9c383BoAtwHB_cYxOJ7ptCK_DilVgArPSoy0Q/exec';
 // Fuente de verdad única para identidad visual de usuarios
+// Los colores viven en CSS (--u-*) para tener un paso propio en modo oscuro.
 const USERS = {
-  Luca:  { color: '#C2613F', initial: 'L' },
-  Joaco: { color: '#6E8B5B', initial: 'J' },
-  Toty:  { color: '#5E7A93', initial: 'T' }
+  Luca:  { color: 'var(--u-luca)',  ink: 'var(--u-luca-ink)',  initial: 'L' },
+  Joaco: { color: 'var(--u-joaco)', ink: 'var(--u-joaco-ink)', initial: 'J' },
+  Toty:  { color: 'var(--u-toty)',  ink: 'var(--u-toty-ink)',  initial: 'T' }
 };
 const NAMES = Object.keys(USERS);
 const ICON_SUN = '<svg class="ico-sm sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
 const ICON_MOON = '<svg class="ico-sm moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const ICON_PAW_SM = '<svg class="ico-sm paw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg>';
 const WHO_KEY = 'keo-current-user-v2';
 const CACHE_KEY = 'keo-records-cache-v2';
+const WALKS_CACHE_KEY = 'keo-walks-cache-v1';
 
 let state = {
   currentUser: null,
   records: [],
+  walks: [], // paseos: { id, timestamp, dateKey, who } — varios por día
+
   lastSync: 0,
   firstSyncDone: false, // true cuando hay datos confiables (caché o primer sync)
   isBusy: { manana: false, noche: false }
@@ -807,7 +1051,10 @@ async function apiGet() {
   if (!res.ok) throw new Error('Network error');
   const data = await res.json();
   if (!data.ok) throw new Error(data.error || 'API error');
-  return data.records || [];
+  return {
+    records: data.records || [],
+    walks: Array.isArray(data.walks) ? data.walks : null // null = backend viejo, sin paseos
+  };
 }
 
 async function apiPost(body) {
@@ -837,6 +1084,10 @@ function loadLocal() {
       if (state.records.length > 0) state.firstSyncDone = true;
     }
   } catch (e) {}
+  try {
+    const walks = localStorage.getItem(WALKS_CACHE_KEY);
+    if (walks) state.walks = JSON.parse(walks);
+  } catch (e) {}
 }
 
 function saveWho() {
@@ -845,8 +1096,10 @@ function saveWho() {
 }
 
 function saveCache() {
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify(state.records)); }
-  catch (e) {}
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(state.records));
+    localStorage.setItem(WALKS_CACHE_KEY, JSON.stringify(state.walks));
+  } catch (e) {}
 }
 
 // ==================== SYNC ====================
@@ -859,8 +1112,9 @@ async function syncFromServer(silent = false) {
   if (silent && pendingWrites > 0) return false;
   if (!silent) setSyncStatus('syncing', 'Sincronizando…');
   try {
-    const records = await apiGet();
+    const { records, walks } = await apiGet();
     state.records = records;
+    if (walks) state.walks = walks;
     state.lastSync = Date.now();
     state.firstSyncDone = true;
     saveCache();
@@ -1026,7 +1280,7 @@ function userCircleHTML(name, size) {
   if (!u) return '<span class="cal-dash">—</span>';
   const fs = Math.round(size * 0.46);
   return '<span class="user-circle" style="width:' + size + 'px;height:' + size + 'px;' +
-    'font-size:' + fs + 'px;background:' + u.color + '">' + u.initial + '</span>';
+    'font-size:' + fs + 'px;background:' + u.color + ';color:' + u.ink + '">' + u.initial + '</span>';
 }
 
 function countByUser(records) {
@@ -1036,7 +1290,7 @@ function countByUser(records) {
     if (!counts[r.who]) return;
     counts[r.who].total++;
     if (r.meal === 'manana') counts[r.who].manana++;
-    else counts[r.who].noche++;
+    else if (r.meal === 'noche') counts[r.who].noche++;
   });
   return counts;
 }
@@ -1055,7 +1309,8 @@ function renderMiniScore() {
     .sort((a, b) => b.total - a.total);
 
   const tiles = ranking.map((r, i) => {
-    const leader = (i === 0 && r.total > 0) ? ' leader' : '';
+    // Sin líder si hay empate arriba (antes ganaba el primero del array)
+    const leader = (i === 0 && r.total > 0 && r.total > (ranking[1] ? ranking[1].total : 0)) ? ' leader' : '';
     return '<div class="stat-tile' + leader + '">' +
       '<div class="stat-tile-top">' +
         userCircleHTML(r.name, 24) +
@@ -1086,23 +1341,51 @@ function renderMiniScore() {
     '<div class="mini-grid">' + tiles + totalTile + '</div>';
 }
 
-// Tab Scoring — fetch propio para histórico completo y datos frescos
+// Tab Ranking — pinta al instante con lo que ya hay en memoria y refresca en segundo
+// plano: sin spinner ni salto si ya había datos (se atenúa mientras recarga).
 let scoringRecords = null;
+let scoringWalks = null;
+let scoringSig = '';
+let rankMetric = 'meals'; // 'meals' | 'walks'
+const METRIC = {
+  meals: { sing: 'comida', plur: 'comidas', donutTitle: '¿Quién le dio de comer?' },
+  walks: { sing: 'paseo', plur: 'paseos', donutTitle: '¿Quién lo sacó a pasear?' }
+};
+
 async function loadScoring() {
   const loading = document.getElementById('scoringLoading');
   const content = document.getElementById('scoringContent');
-  loading.style.display = 'flex';
-  content.style.display = 'none';
+  if (state.firstSyncDone) {
+    scoringRecords = state.records;
+    scoringWalks = state.walks;
+  }
+  if (scoringRecords) {
+    scoringSig = JSON.stringify([scoringRecords, scoringWalks]);
+    renderScoring();
+    loading.style.display = 'none';
+    content.style.display = 'block';
+    content.classList.add('refreshing');
+  } else {
+    loading.style.display = 'flex';
+    content.style.display = 'none';
+  }
   try {
-    scoringRecords = await apiGet();
-    renderScoring(scoringRecords);
+    const data = await apiGet();
+    const walks = data.walks || state.walks; // backend viejo: sin paseos
+    const sig = JSON.stringify([data.records, walks]);
+    scoringRecords = data.records;
+    scoringWalks = walks;
+    // Solo re-pintar si cambió algo (evita repetir las animaciones de gusto)
+    if (sig !== scoringSig || content.style.display === 'none') renderScoring();
+    scoringSig = sig;
+    loading.style.display = 'none';
     content.style.display = 'block';
   } catch (err) {
     console.error('Scoring fetch error:', err);
-    loading.innerHTML = '<span>No se pudo cargar el histórico. Reintentá.</span>';
-    return;
+    if (!scoringRecords) loading.innerHTML = '<span>No se pudo cargar el histórico. Reintentá.</span>';
+  } finally {
+    content.classList.remove('refreshing');
   }
-  loading.style.display = 'none';
 }
 
 // Período activo del Ranking: '7' | '30' | 'all'
@@ -1143,7 +1426,8 @@ function buildBuckets(records, period) {
     return Object.keys(map).sort().slice(-12).map(k => {
       const byUser = {}; let total = 0;
       NAMES.forEach(n => { byUser[n] = map[k][n] || 0; total += byUser[n]; });
-      return { label: MONTH_ABBR[Number(k.slice(5, 7)) - 1], byUser, total };
+      const mon = MONTH_ABBR[Number(k.slice(5, 7)) - 1];
+      return { label: mon, full: mon + ' ' + k.slice(0, 4), byUser, total };
     });
   }
   const days = Number(period);
@@ -1154,24 +1438,40 @@ function buildBuckets(records, period) {
     const byUser = {}; let total = 0;
     NAMES.forEach(n => byUser[n] = 0);
     records.forEach(r => { if (r.dateKey === key && byUser[r.who] !== undefined) { byUser[r.who]++; total++; } });
-    buckets.push({ label: days <= 7 ? DAY_LETTERS[d.getDay()] : String(d.getDate()), byUser, total });
+    buckets.push({
+      label: days <= 7 ? DAY_LETTERS[d.getDay()] : String(d.getDate()),
+      full: d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }),
+      byUser, total
+    });
   }
   return buckets;
 }
 
-function chartHTML(records, period) {
-  const buckets = buildBuckets(records, period);
-  if (!buckets.length || buckets.every(b => b.total === 0)) return '';
-  const max = Math.max(1, ...buckets.map(b => b.total));
-  const MAXH = 112;
-  const labelEvery = buckets.length <= 10 ? 1 : Math.ceil(buckets.length / 6);
+let chartBuckets = []; // buckets del último gráfico, para el tooltip
 
-  const bars = buckets.map(b => {
-    if (b.total === 0) return '<div class="chart-col"><div class="chart-bar empty"></div></div>';
+function chartHTML(items, period, m) {
+  const buckets = buildBuckets(items, period);
+  chartBuckets = buckets;
+  if (!buckets.length || buckets.every(b => b.total === 0)) {
+    return '<div class="rank-chart"><div class="chart-empty">Sin ' + m.plur + ' en este período</div></div>';
+  }
+  const max = Math.max(1, ...buckets.map(b => b.total));
+  const MAXH = 100;
+  const showVals = buckets.length <= 12; // número sobre cada barra solo si entran (Semana / Todo)
+  const labelEvery = buckets.length <= 12 ? 1 : Math.ceil(buckets.length / 6);
+  const step = buckets.length > 12 ? 0.012 : 0.045;
+
+  const bars = buckets.map((b, i) => {
+    const delay = (i * step).toFixed(3);
+    if (b.total === 0) return '<div class="chart-col" data-i="' + i + '"><div class="chart-bar empty"></div></div>';
     const segs = NAMES.filter(n => b.byUser[n] > 0).map(n =>
       '<div class="chart-seg" style="height:' + Math.max(3, b.byUser[n] / max * MAXH) + 'px;background:' + USERS[n].color + '"></div>'
     ).join('');
-    return '<div class="chart-col"><div class="chart-bar">' + segs + '</div></div>';
+    const val = showVals
+      ? '<span class="chart-val" style="animation-delay:' + (Number(delay) + 0.35).toFixed(3) + 's">' + b.total + '</span>'
+      : '';
+    return '<div class="chart-col" data-i="' + i + '">' + val +
+      '<div class="chart-bar" style="animation-delay:' + delay + 's">' + segs + '</div></div>';
   }).join('');
 
   const labels = buckets.map((b, i) =>
@@ -1186,48 +1486,175 @@ function chartHTML(records, period) {
     '<div class="chart-legend">' + legend + '</div>' +
     '<div class="chart-bars">' + bars + '</div>' +
     '<div class="chart-labels">' + labels + '</div>' +
+    '<div class="chart-tip" hidden></div>' +
   '</div>';
 }
 
-function renderScoring(records) {
+// Torta (donut): reparto por persona. Colores fijos por persona, en orden fijo.
+const DONUT_R = 46;
+const DONUT_C = 2 * Math.PI * DONUT_R;
+
+function donutHTML(counts, total, m, caption) {
+  const active = NAMES.filter(n => counts[n].total > 0);
+  const gap = active.length > 1 ? 2.4 : 0; // aire entre porciones
+  const unitTotal = total === 1 ? m.sing : m.plur;
+  let acc = 0;
+  const segs = NAMES.map((n, i) => {
+    const v = counts[n].total;
+    if (!v) return '';
+    const len = v / total * DONUT_C;
+    const start = acc;
+    acc += len;
+    return '<circle class="donut-seg" data-name="' + n + '" data-dash="' + Math.max(0.1, len - gap).toFixed(2) + '"' +
+      ' cx="60" cy="60" r="' + DONUT_R + '" stroke-dasharray="0 ' + DONUT_C.toFixed(2) + '"' +
+      ' stroke-dashoffset="' + (-start).toFixed(2) + '"' +
+      ' style="stroke:' + USERS[n].color + ';transition-delay:' + (0.15 + i * 0.12).toFixed(2) + 's"></circle>';
+  }).join('');
+
+  const legend = NAMES.map((n, i) => {
+    const v = counts[n].total;
+    const pct = total ? Math.round(v / total * 100) + '%' : '—';
+    return '<button class="dl-row" data-name="' + n + '" data-count="' + v + '" data-pct="' + pct + '"' +
+      ' style="animation-delay:' + (0.2 + i * 0.08).toFixed(2) + 's">' +
+      '<span class="dl-key" style="background:' + USERS[n].color + '"></span>' +
+      '<span class="dl-name">' + n + '</span>' +
+      '<span class="dl-val">' + v + '</span>' +
+      '<span class="dl-pct">' + pct + '</span>' +
+    '</button>';
+  }).join('');
+
+  return '<div class="donut-card" data-total="' + total + '" data-unit="' + unitTotal + '">' +
+    '<div class="donut-title">' + m.donutTitle + '</div>' +
+    '<div class="donut-sub">' + caption + ' · tocá para ver cada uno</div>' +
+    '<div class="donut-body">' +
+      '<div class="donut-wrap">' +
+        '<svg class="donut-svg" viewBox="0 0 120 120" aria-hidden="true">' +
+          '<circle class="donut-track" cx="60" cy="60" r="' + DONUT_R + '"></circle>' + segs +
+        '</svg>' +
+        '<div class="donut-center"><span class="donut-num" data-target="' + total + '">' + total + '</span>' +
+          '<span class="donut-unit">' + unitTotal + '</span></div>' +
+      '</div>' +
+      '<div class="donut-legend">' + legend + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function countUp(el, target, ms) {
+  if (!target || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = target; return; }
+  // Se mide con performance.now() (monótono): el timestamp de rAF puede venir atrasado
+  // y daba valores negativos o trabados en 0.
+  const t0 = performance.now();
+  let done = false;
+  const tick = () => {
+    if (done || el.dataset.stop) return; // se corta si el usuario ya tocó una porción
+    const p = Math.min(1, (performance.now() - t0) / ms);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(tick); else done = true;
+  };
+  el.textContent = '0';
+  requestAnimationFrame(tick);
+  // Red de seguridad: si rAF no corre (pestaña en 2.º plano), dejar el valor final igual
+  setTimeout(() => {
+    if (done || el.dataset.stop) return;
+    done = true;
+    el.textContent = target;
+  }, ms + 150);
+}
+
+// Las porciones arrancan en 0 y "se dibujan" hasta su tamaño (transition en stroke-dasharray).
+// Se fuerza un reflow para que el navegador registre el estado inicial y dispare la transición.
+function animateDonut() {
+  const root = document.getElementById('rankDonut');
+  const segs = root.querySelectorAll('.donut-seg');
+  void root.getBoundingClientRect();
+  segs.forEach(s => { s.style.strokeDasharray = s.dataset.dash + ' ' + DONUT_C.toFixed(2); });
+  const num = root.querySelector('.donut-num');
+  if (num) countUp(num, Number(num.dataset.target), 800);
+}
+
+// Días que abarca 'Todo' (desde el primer registro hasta hoy), para el promedio por día
+function spanDays(items) {
+  if (!items.length) return 1;
+  const first = items.reduce((min, r) => (r.dateKey < min ? r.dateKey : min), items[0].dateKey);
+  const ms = new Date(getDateKey() + 'T00:00:00') - new Date(first + 'T00:00:00');
+  return Math.max(1, Math.round(ms / 86400000) + 1);
+}
+
+function fmt1(x) {
+  return x.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+function avgTrendHTML(cur, prev, hasPrev) {
+  if (!hasPrev) return '';
+  const d = Math.round((cur - prev) * 10) / 10;
+  if (d > 0) return '<span class="rank-trend up">▲' + fmt1(d) + '</span>';
+  if (d < 0) return '<span class="rank-trend down">▼' + fmt1(-d) + '</span>';
+  return '<span class="rank-trend flat">=</span>';
+}
+
+function renderScoring() {
+  const items = (rankMetric === 'walks' ? scoringWalks : scoringRecords) || [];
+  const m = METRIC[rankMetric];
+  const unit = n => (n === 1 ? m.sing : m.plur);
   const days = rankPeriod === 'all' ? null : Number(rankPeriod);
   const hasPrev = days !== null;
-  const cur = hasPrev ? recordsInLastDays(records, days) : records;
-  const prevCounts = hasPrev ? countByUser(recordsInPrevWindow(records, days)) : null;
+  const cur = hasPrev ? recordsInLastDays(items, days) : items;
+  const prevCounts = hasPrev ? countByUser(recordsInPrevWindow(items, days)) : null;
   const counts = countByUser(cur);
   const totalAll = NAMES.reduce((s, n) => s + counts[n].total, 0);
   const totalPrev = hasPrev ? NAMES.reduce((s, n) => s + prevCounts[n].total, 0) : 0;
+  const caption = RANK_CAPTIONS[rankPeriod];
+
+  document.getElementById('rankDonut').innerHTML = donutHTML(counts, totalAll, m, caption);
+  animateDonut();
+  document.getElementById('rankChart').innerHTML = chartHTML(items, rankPeriod, m);
+  document.getElementById('rankCaption').textContent =
+    caption + (hasPrev ? ' · vs período anterior' : '');
 
   const ranking = NAMES.map(n => Object.assign({ name: n }, counts[n]))
     .sort((a, b) => b.total - a.total);
 
-  const caption = RANK_CAPTIONS[rankPeriod];
-  document.getElementById('rankChart').innerHTML = chartHTML(records, rankPeriod);
-  document.getElementById('rankCaption').textContent =
-    caption + (hasPrev ? ' · vs período anterior' : '');
-
   const tiles = ranking.map((r, i) => {
-    const leader = (i === 0 && r.total > 0) ? ' leader' : '';
+    // Sin líder si hay empate arriba (antes ganaba el primero del array)
+    const leader = (i === 0 && r.total > 0 && r.total > (ranking[1] ? ranking[1].total : 0)) ? ' leader' : '';
     const trend = trendHTML(r.total, prevCounts ? prevCounts[r.name].total : 0, hasPrev);
+    const sub = rankMetric === 'meals'
+      ? '☀ ' + r.manana + ' · 🌙 ' + r.noche
+      : (totalAll ? Math.round(r.total / totalAll * 100) : 0) + '% de los paseos';
     return '<div class="rank-tile' + leader + '">' +
       '<div class="rank-tile-top">' + userCircleHTML(r.name, 24) +
         '<span class="rank-tile-name">' + r.name + '</span>' + trend + '</div>' +
       '<div class="rank-tile-body"><span class="rank-num">' + r.total + '</span>' +
-        '<span class="rank-unit">' + (r.total === 1 ? 'comida' : 'comidas') + '</span></div>' +
-      '<div class="rank-sub">☀ ' + r.manana + ' · 🌙 ' + r.noche + '</div>' +
+        '<span class="rank-unit">' + unit(r.total) + '</span></div>' +
+      '<div class="rank-sub">' + sub + '</div>' +
     '</div>';
   }).join('');
 
-  const totalTile =
-    '<div class="rank-tile total">' +
-      '<div class="rank-tile-top"><span class="rank-tile-name">Total</span>' +
-        trendHTML(totalAll, totalPrev, hasPrev) + '</div>' +
-      '<div class="rank-tile-body"><span class="rank-num">' + totalAll + '</span>' +
-        '<span class="rank-unit">' + (totalAll === 1 ? 'comida' : 'comidas') + '</span></div>' +
-      '<div class="rank-sub">' + caption.toLowerCase() + '</div>' +
-    '</div>';
+  let lastTile;
+  if (rankMetric === 'walks') {
+    // Paseos: el 4.º tile es el promedio por día (más útil que repetir el total de la torta)
+    const avg = totalAll / (days || spanDays(items));
+    const prevAvg = hasPrev ? totalPrev / days : 0;
+    lastTile =
+      '<div class="rank-tile total">' +
+        '<div class="rank-tile-top"><span class="rank-tile-name">Por día</span>' +
+          avgTrendHTML(avg, prevAvg, hasPrev) + '</div>' +
+        '<div class="rank-tile-body"><span class="rank-num">' + fmt1(avg) + '</span>' +
+          '<span class="rank-unit">paseos</span></div>' +
+        '<div class="rank-sub">promedio · ' + totalAll + ' en total</div>' +
+      '</div>';
+  } else {
+    lastTile =
+      '<div class="rank-tile total">' +
+        '<div class="rank-tile-top"><span class="rank-tile-name">Total</span>' +
+          trendHTML(totalAll, totalPrev, hasPrev) + '</div>' +
+        '<div class="rank-tile-body"><span class="rank-num">' + totalAll + '</span>' +
+          '<span class="rank-unit">' + unit(totalAll) + '</span></div>' +
+        '<div class="rank-sub">' + caption.toLowerCase() + '</div>' +
+      '</div>';
+  }
 
-  document.getElementById('rankGrid').innerHTML = tiles + totalTile;
+  document.getElementById('rankGrid').innerHTML = tiles + lastTile;
 }
 
 // Tab Mes — calendario calculado desde records en memoria
@@ -1244,6 +1671,8 @@ function buildDayMap(records) {
 
 function renderCalendar() {
   const map = buildDayMap(state.records);
+  const walkCount = {};
+  state.walks.forEach(w => { walkCount[w.dateKey] = (walkCount[w.dateKey] || 0) + 1; });
   const year = calViewDate.getFullYear();
   const month = calViewDate.getMonth();
   const todayKey = getDateKey();
@@ -1271,10 +1700,17 @@ function renderCalendar() {
     const slotN = rec.noche
       ? '<div class="cal-slot cal-slot-tap" data-date="' + key + '" data-meal="noche">' + ICON_MOON + userCircleHTML(rec.noche.who, 16) + '</div>'
       : '<div class="cal-slot">' + ICON_MOON + '<span class="cal-dash">—</span></div>';
+    // Paseos del día: huella + cantidad (solo si hubo). Tocar lleva a Paseos con ese día elegido.
+    const nw = walkCount[key] || 0;
+    const slotW = nw
+      ? '<div class="cal-slot cal-slot-tap cal-walk" data-walkdate="' + key + '">' + ICON_PAW_SM +
+        '<span class="cal-walk-n">' + nw + '</span></div>'
+      : '';
     cells += '<div class="cal-cell' + (isToday ? ' today' : '') + (isFuture ? ' future' : '') + '">' +
       '<div class="cal-daynum">' + d + '</div>' +
       slotM +
       slotN +
+      slotW +
     '</div>';
   }
   document.getElementById('calGrid').innerHTML = cells;
@@ -1282,6 +1718,8 @@ function renderCalendar() {
 
 // Tocar un día ya registrado en el calendario abre el editor
 document.getElementById('calGrid').addEventListener('click', (e) => {
+  const walkSlot = e.target.closest('.cal-walk');
+  if (walkSlot) { openWalksDay(walkSlot.dataset.walkdate); return; }
   const slot = e.target.closest('.cal-slot-tap');
   if (!slot) return;
   const dateKey = slot.dataset.date;
@@ -1366,6 +1804,290 @@ document.getElementById('btnEditConfirm').onclick = async () => {
   }
 };
 
+// ==================== PASEOS ====================
+// Varios paseos por día. Cada uno tiene un id propio (lo genera el cliente) para
+// poder editarlo o borrarlo sin ambigüedad aunque haya dos a la misma hora.
+const WEEK_LETTERS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+const ICON_ROW_EDIT = '<svg class="walk-row-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+let walkWeekOffset = 0;      // 0 = esta semana, -1 = la anterior, ...
+let walkSelectedDay = null;  // dateKey elegido en la tira (null = hoy)
+let walkQuickLock = false;   // evita doble registro por doble toque
+
+function newWalkId() {
+  return 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function walksOn(dateKey) {
+  return state.walks.filter(w => w.dateKey === dateKey).sort((a, b) => a.timestamp - b.timestamp);
+}
+
+function weekStartDate(offset) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - (d.getDay() + 6) % 7 + offset * 7); // lunes
+  return d;
+}
+
+function dayLabelLong(dateKey) {
+  if (dateKey === getDateKey()) return 'Hoy';
+  if (dateKey === getDateKey(new Date(Date.now() - 86400000))) return 'Ayer';
+  const s = new Date(dateKey + 'T00:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// "hace 25 min" / "09:30 · hace 3 h" — cuánto pasó desde el último paseo
+function agoText(ts) {
+  const min = Math.floor((Date.now() - Number(ts)) / 60000);
+  if (min < 0) return formatTime(ts); // horario editado a más tarde que ahora
+  if (min < 1) return 'recién';
+  if (min < 60) return 'hace ' + min + ' min';
+  return formatTime(ts) + ' · hace ' + Math.floor(min / 60) + ' h';
+}
+
+// Semanas de diferencia entre la semana de dateKey y la actual (0 = esta, -1 = pasada)
+function weekOffsetFor(dateKey) {
+  const d = new Date(dateKey + 'T00:00:00');
+  d.setDate(d.getDate() - (d.getDay() + 6) % 7);
+  return Math.round((d - weekStartDate(0)) / (7 * 86400000));
+}
+
+// Desde el calendario: abrir Paseos con ese día elegido en la tira
+function openWalksDay(dateKey) {
+  walkWeekOffset = weekOffsetFor(dateKey);
+  walkSelectedDay = dateKey;
+  switchTab('paseos');
+}
+
+function renderWalks() {
+  const todayKey = getDateKey();
+
+  // Card de hoy
+  const today = walksOn(todayKey);
+  const status = document.getElementById('walkTodayStatus');
+  document.getElementById('walkCard').classList.toggle('has-walks', today.length > 0);
+  document.getElementById('walkTodayCount').textContent = today.length;
+  const thisWeekStart = getDateKey(weekStartDate(0));
+  document.getElementById('walkWeekCount').textContent =
+    state.walks.filter(w => w.dateKey >= thisWeekStart && w.dateKey <= todayKey).length;
+  status.classList.remove('loading', 'warn');
+  if (today.length) {
+    const last = today[today.length - 1];
+    status.textContent = 'Último: ' + last.who + ' · ' + agoText(last.timestamp);
+  } else if (!state.firstSyncDone) {
+    status.textContent = 'Cargando…';
+    status.classList.add('loading');
+  } else {
+    status.textContent = 'Todavía no salió hoy';
+    if (new Date().getHours() >= 12) status.classList.add('warn'); // pasado el mediodía, avisar
+  }
+
+  // Tira semanal (lunes a domingo)
+  const start = weekStartDate(walkWeekOffset);
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    days.push({ date: d, key: getDateKey(d) });
+  }
+  const end = days[6].date;
+  const selected = walkSelectedDay || todayKey;
+  const weekWalks = state.walks.filter(w => w.dateKey >= days[0].key && w.dateKey <= days[6].key);
+
+  document.getElementById('weekTitle').textContent =
+    walkWeekOffset === 0 ? 'Esta semana' : walkWeekOffset === -1 ? 'Semana pasada' : 'Hace ' + (-walkWeekOffset) + ' semanas';
+  const range = start.getDate() + (start.getMonth() === end.getMonth() ? '' : ' ' + MONTH_ABBR[start.getMonth()]) +
+    ' – ' + end.getDate() + ' ' + MONTH_ABBR[end.getMonth()];
+  document.getElementById('weekRange').textContent =
+    range + ' · ' + weekWalks.length + (weekWalks.length === 1 ? ' paseo' : ' paseos');
+  document.getElementById('weekNext').disabled = walkWeekOffset >= 0;
+
+  document.getElementById('weekStrip').innerHTML = days.map((day, i) => {
+    const list = walksOn(day.key);
+    const future = day.key > todayKey;
+    let inner;
+    if (!list.length) inner = '<span class="wk-empty"></span>';
+    else if (list.length <= 3) inner = list.map(w => userCircleHTML(w.who, 22)).join('');
+    else inner = list.slice(0, 2).map(w => userCircleHTML(w.who, 22)).join('') +
+      '<span class="wk-more">+' + (list.length - 2) + '</span>';
+    const cls = 'wk-day' + (day.key === todayKey ? ' today' : '') +
+      (day.key === selected ? ' sel' : '') + (future ? ' future' : '');
+    const aria = dayLabelLong(day.key) + ': ' + list.length + (list.length === 1 ? ' paseo' : ' paseos');
+    return '<button class="' + cls + '" data-date="' + day.key + '" aria-label="' + aria + '"' + (future ? ' disabled' : '') + '>' +
+      '<span class="wk-letter">' + WEEK_LETTERS[i] + '</span>' +
+      '<span class="wk-track">' + inner + '</span>' +
+      '<span class="wk-num">' + day.date.getDate() + '</span>' +
+    '</button>';
+  }).join('');
+
+  // Resumen de la semana por persona
+  const counts = {};
+  NAMES.forEach(n => counts[n] = 0);
+  weekWalks.forEach(w => { if (counts[w.who] !== undefined) counts[w.who]++; });
+  const max = Math.max(...NAMES.map(n => counts[n]));
+  document.getElementById('weekSummary').innerHTML = NAMES.map(n =>
+    '<div class="wk-sum-item' + (max > 0 && counts[n] === max ? ' lead' : '') + '">' +
+      '<span class="wk-sum-num">' + counts[n] + '</span>' +
+      '<span class="wk-sum-name">' + userCircleHTML(n, 16) + n + '</span>' +
+    '</div>'
+  ).join('');
+
+  // Lista del día elegido
+  const dayWalks = walksOn(selected);
+  document.getElementById('walkDayTitle').textContent = dayLabelLong(selected);
+  document.getElementById('walkList').innerHTML = dayWalks.length
+    ? dayWalks.map(w =>
+        '<button class="walk-row" data-id="' + w.id + '">' +
+          userCircleHTML(w.who, 34) +
+          '<span class="walk-row-main"><span class="walk-row-name">' + w.who + '</span>' +
+          '<span class="walk-row-sub">' + formatTime(w.timestamp) + '</span></span>' +
+          ICON_ROW_EDIT +
+        '</button>').join('')
+    : '<div class="walk-empty">' + (selected === todayKey ? 'Todavía no salió a pasear hoy' : 'Sin paseos este día') + '</div>';
+}
+
+function shiftWalkWeek(delta) {
+  walkWeekOffset = Math.min(0, walkWeekOffset + delta);
+  if (walkWeekOffset === 0) {
+    walkSelectedDay = null;
+  } else {
+    const sunday = weekStartDate(walkWeekOffset);
+    sunday.setDate(sunday.getDate() + 6);
+    walkSelectedDay = getDateKey(sunday);
+  }
+  renderWalks();
+}
+
+// Escritura optimista genérica para paseos: aplica al instante y revierte si falla la red.
+async function walkWrite(body, apply, revert, okMsg, undoFn) {
+  apply();
+  saveCache();
+  renderAll();
+  pendingWrites++;
+  setSyncStatus('syncing', 'Guardando…');
+  try {
+    await apiPost(body);
+    state.lastSync = Date.now();
+    setSyncStatus('ok', 'Guardado');
+    setTimeout(() => setSyncStatus('hidden'), 1200);
+    if (okMsg) showToast(okMsg, undoFn ? 'Deshacer' : undefined, undoFn);
+  } catch (err) {
+    revert();
+    saveCache();
+    renderAll();
+    setSyncStatus('error', 'Sin conexión');
+    showToast('No se pudo guardar. Probá de nuevo.');
+  } finally {
+    pendingWrites--;
+  }
+}
+
+function addWalk(walk, isUndo) {
+  return walkWrite({ action: 'addWalk', ...walk },
+    () => { state.walks.push(walk); },
+    () => { state.walks = state.walks.filter(w => w.id !== walk.id); },
+    isUndo ? 'Deshecho' : 'Paseo registrado',
+    isUndo ? null : () => deleteWalk(walk.id, true));
+}
+
+function updateWalk(id, timestamp, who) {
+  const walk = state.walks.find(w => w.id === id);
+  if (!walk) return;
+  const backup = { timestamp: walk.timestamp, who: walk.who };
+  return walkWrite({ action: 'editWalk', id, timestamp, who },
+    () => { walk.timestamp = timestamp; walk.who = who; },
+    () => { walk.timestamp = backup.timestamp; walk.who = backup.who; },
+    'Paseo actualizado');
+}
+
+function deleteWalk(id, isUndo) {
+  const walk = state.walks.find(w => w.id === id);
+  if (!walk) return;
+  return walkWrite({ action: 'deleteWalk', id },
+    () => { state.walks = state.walks.filter(w => w.id !== id); },
+    () => { state.walks.push(walk); },
+    isUndo ? 'Deshecho' : 'Paseo borrado',
+    isUndo ? null : () => addWalk(walk, true));
+}
+
+// Botón principal: registra un paseo de "vos" ahora mismo, sin modal.
+function quickWalk() {
+  if (!state.currentUser) { openWalkModal(getDateKey(), null); return; }
+  if (walkQuickLock) return;
+  walkQuickLock = true;
+  setTimeout(() => { walkQuickLock = false; }, 1500);
+  walkWeekOffset = 0;
+  walkSelectedDay = null;
+  if (navigator.vibrate) navigator.vibrate(10);
+  addWalk({ id: newWalkId(), timestamp: Date.now(), dateKey: getDateKey(), who: state.currentUser });
+}
+
+// Modal para agregar en otro día/horario o editar uno existente
+let walkEdit = null;        // { dateKey, walk | null }
+let walkSelectedWho = null;
+
+function renderWalkWhoButtons() {
+  const container = document.getElementById('walkWhoButtons');
+  container.innerHTML = '';
+  NAMES.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'who-btn' + (name === walkSelectedWho ? ' active' : '');
+    btn.textContent = name;
+    btn.onclick = () => { walkSelectedWho = name; renderWalkWhoButtons(); };
+    container.appendChild(btn);
+  });
+}
+
+function openWalkModal(dateKey, walk) {
+  walkEdit = { dateKey, walk };
+  walkSelectedWho = walk ? walk.who : state.currentUser;
+  renderWalkWhoButtons();
+  document.getElementById('modalWalkTitle').textContent = walk ? 'Editar paseo' : 'Registrar paseo';
+  document.getElementById('modalWalkText').textContent = dayLabelLong(dateKey);
+  const d = walk ? new Date(Number(walk.timestamp)) : new Date();
+  document.getElementById('walkTimeInput').value =
+    String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  document.getElementById('btnWalkDelete').style.display = walk ? '' : 'none';
+  openModal('modalWalk');
+}
+
+document.getElementById('btnWalkConfirm').onclick = () => {
+  if (!walkEdit) return;
+  const timeVal = document.getElementById('walkTimeInput').value;
+  if (!timeVal) { showToast('Elegí un horario'); return; }
+  if (!walkSelectedWho) { showToast('Elegí quién lo sacó'); return; }
+  const [hh, mm] = timeVal.split(':').map(Number);
+  const d = new Date(walkEdit.dateKey + 'T00:00:00');
+  d.setHours(hh, mm, 0, 0);
+  closeModal('modalWalk');
+  if (walkEdit.walk) updateWalk(walkEdit.walk.id, d.getTime(), walkSelectedWho);
+  else addWalk({ id: newWalkId(), timestamp: d.getTime(), dateKey: walkEdit.dateKey, who: walkSelectedWho });
+};
+
+document.getElementById('btnWalkDelete').onclick = () => {
+  if (!walkEdit || !walkEdit.walk) return;
+  closeModal('modalWalk');
+  deleteWalk(walkEdit.walk.id);
+};
+
+document.getElementById('btnQuickWalk').onclick = quickWalk;
+document.getElementById('btnAddWalkDay').onclick = () => openWalkModal(walkSelectedDay || getDateKey(), null);
+document.getElementById('weekPrev').onclick = () => shiftWalkWeek(-1);
+document.getElementById('weekNext').onclick = () => shiftWalkWeek(1);
+
+document.getElementById('weekStrip').addEventListener('click', (e) => {
+  const day = e.target.closest('.wk-day');
+  if (!day || day.disabled) return;
+  walkSelectedDay = day.dataset.date;
+  renderWalks();
+});
+
+document.getElementById('walkList').addEventListener('click', (e) => {
+  const row = e.target.closest('.walk-row');
+  if (!row) return;
+  const walk = state.walks.find(w => w.id === row.dataset.id);
+  if (walk) openWalkModal(walk.dateKey, walk);
+});
+
 // ==================== AVATAR REACTIVO DE KEO ====================
 // Antes de la hora de corte mira el desayuno; después, la cena.
 const KEO_CUTOFF_HOUR = 19;
@@ -1408,6 +2130,7 @@ function renderAll() {
   renderHistory();
   renderMiniScore();
   renderKeoAvatar();
+  renderWalks();
   if (document.getElementById('tab-mes').style.display !== 'none') renderCalendar();
 }
 
@@ -1528,7 +2251,7 @@ function editMealToday(meal) {
   openEditModal(getDateKey(), meal, rec);
 }
 
-document.querySelectorAll('.btn-feed').forEach(btn => {
+document.querySelectorAll('.meals .btn-feed').forEach(btn => {
   btn.addEventListener('click', () => markMeal(btn.dataset.meal));
 });
 
@@ -1540,21 +2263,10 @@ document.querySelectorAll('.meal-action-btn').forEach(btn => {
   });
 });
 
-document.getElementById('btnRefresh').onclick = () => syncFromServer();
-
-document.getElementById('btnReset').onclick = () => openModal('modalReset');
-
-document.getElementById('btnResetConfirm').onclick = async () => {
-  closeModal('modalReset');
-  setSyncStatus('syncing', 'Reiniciando…');
-  try {
-    await apiPost({ action: 'resetDay', dateKey: getDateKey() });
-    await syncFromServer(true);
-    showToast('Día reiniciado');
-  } catch (err) {
-    showToast('Error al reiniciar');
-    setSyncStatus('error', 'Error');
-  }
+// Ícono ↻ del header: actualizar a mano (reemplaza al viejo botón "Actualizar")
+document.getElementById('syncIndicator').onclick = () => {
+  syncFromServer();
+  if (document.getElementById('tab-scoring').style.display !== 'none') loadScoring();
 };
 
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -1577,28 +2289,101 @@ document.addEventListener('visibilitychange', () => {
 const TAB_KEY = 'keo-active-tab';
 
 function switchTab(tab) {
-  ['hoy', 'scoring', 'mes'].forEach(t => {
+  ['hoy', 'paseos', 'scoring', 'mes'].forEach(t => {
     document.getElementById('tab-' + t).style.display = (t === tab) ? 'block' : 'none';
   });
+  // Fundido suave al entrar a la pestaña
+  const sec = document.getElementById('tab-' + tab);
+  sec.classList.remove('anim-in');
+  void sec.offsetWidth; // reflow para reiniciar la animación
+  sec.classList.add('anim-in');
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
   try { sessionStorage.setItem(TAB_KEY, tab); } catch (e) {}
   if (tab === 'scoring') loadScoring();
   if (tab === 'mes') renderCalendar();
+  if (tab === 'paseos') renderWalks();
 }
 
 document.querySelectorAll('.tab-btn').forEach(b => {
   b.addEventListener('click', () => switchTab(b.dataset.tab));
 });
 
-// Selector de período del Ranking
-document.querySelectorAll('#rankPeriod .who-btn').forEach(b => {
+// Selector de período del Ranking (chips)
+document.querySelectorAll('#rankPeriod .chip').forEach(b => {
   b.addEventListener('click', () => {
     rankPeriod = b.dataset.period;
-    document.querySelectorAll('#rankPeriod .who-btn').forEach(x => x.classList.toggle('active', x === b));
-    if (scoringRecords) renderScoring(scoringRecords);
+    document.querySelectorAll('#rankPeriod .chip').forEach(x => x.classList.toggle('active', x === b));
+    if (scoringRecords) renderScoring();
   });
+});
+
+// Qué se mide en el Ranking: Comidas / Paseos
+document.querySelectorAll('#rankMetric .who-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    rankMetric = b.dataset.metric;
+    document.querySelectorAll('#rankMetric .who-btn').forEach(x => x.classList.toggle('active', x === b));
+    if (scoringRecords) renderScoring();
+  });
+});
+
+// Tocar una porción o una fila de la leyenda resalta a esa persona (tocar de nuevo = ver todos)
+document.getElementById('rankDonut').addEventListener('click', (e) => {
+  const card = e.currentTarget.querySelector('.donut-card');
+  if (!card) return;
+  const hit = e.target.closest('[data-name]');
+  const name = hit && card.dataset.focus !== hit.dataset.name ? hit.dataset.name : '';
+  card.dataset.focus = name;
+  card.classList.toggle('focus', !!name);
+  card.querySelectorAll('[data-name]').forEach(el => el.classList.toggle('on', el.dataset.name === name));
+  const row = name ? card.querySelector('.dl-row[data-name="' + name + '"]') : null;
+  const num = card.querySelector('.donut-num');
+  num.dataset.stop = '1'; // frenar el conteo animado para que no pise este valor
+  num.textContent = row ? row.dataset.count : card.dataset.total;
+  card.querySelector('.donut-unit').textContent = row ? row.dataset.pct + ' · ' + name : card.dataset.unit;
+});
+
+// Tocar una barra muestra el detalle de ese día/mes (tocar de nuevo = cerrar)
+document.getElementById('rankChart').addEventListener('click', (e) => {
+  const chart = e.currentTarget.querySelector('.rank-chart');
+  const tip = chart && chart.querySelector('.chart-tip');
+  const barsEl = chart && chart.querySelector('.chart-bars');
+  if (!tip || !barsEl) return;
+  const col = e.target.closest('.chart-col');
+  const wasOn = col && col.classList.contains('on');
+  barsEl.querySelectorAll('.chart-col.on').forEach(c => c.classList.remove('on'));
+  barsEl.classList.remove('has-on');
+  if (!col || wasOn) { tip.hidden = true; return; }
+  const b = chartBuckets[Number(col.dataset.i)];
+  if (!b) return;
+  col.classList.add('on');
+  barsEl.classList.add('has-on');
+  const m = METRIC[rankMetric];
+  tip.innerHTML = '<div class="chart-tip-title">' + b.full + '</div>' +
+    (b.total
+      ? NAMES.filter(n => b.byUser[n] > 0).map(n =>
+          '<div class="chart-tip-row"><span class="chart-tip-key" style="background:' + USERS[n].color + '"></span>' +
+          '<b>' + b.byUser[n] + '</b>' + n + '</div>').join('') +
+        '<div class="chart-tip-total">' + b.total + ' ' + (b.total === 1 ? m.sing : m.plur) + '</div>'
+      : '<div class="chart-tip-row">Sin ' + m.plur + '</div>');
+  tip.hidden = false;
+  const cr = chart.getBoundingClientRect();
+  const r = col.getBoundingClientRect();
+  const w = tip.offsetWidth;
+  const x = r.left + r.width / 2 - cr.left;
+  tip.style.left = Math.min(cr.width - w / 2 - 6, Math.max(w / 2 + 6, x)) + 'px';
+});
+
+// Tocar fuera del gráfico cierra el tooltip
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#rankChart')) return;
+  const tip = document.querySelector('#rankChart .chart-tip');
+  if (!tip || tip.hidden) return;
+  tip.hidden = true;
+  document.querySelectorAll('#rankChart .chart-col.on').forEach(c => c.classList.remove('on'));
+  const barsEl = document.querySelector('#rankChart .chart-bars');
+  if (barsEl) barsEl.classList.remove('has-on');
 });
 
 document.getElementById('calPrev').onclick = () => {
@@ -1611,17 +2396,18 @@ document.getElementById('calNext').onclick = () => {
 };
 
 // Re-render del reloj y del avatar cada minuto
-setInterval(() => { renderGreeting(); renderKeoAvatar(); }, 60000);
+setInterval(() => { renderGreeting(); renderKeoAvatar(); renderWalks(); }, 60000);
 
 // Red de seguridad: si las animaciones de entrada quedan pausadas (pestaña en 2.º plano
 // durante la carga), asegurar que el contenido sea visible igual.
 window.addEventListener('load', () => {
-  document.querySelectorAll('.hero, .meal, .history-card, .who-segment, .tab-bar, .tab-section')
+  // (.tab-section no va acá: su fundido al cambiar de pestaña se aplica después del load)
+  document.querySelectorAll('.hero, .meal, .history-card, .who-segment, .tab-bar')
     .forEach(el => { el.style.animation = 'none'; });
 });
 
 // ==================== NOVEDADES (una sola vez por dispositivo) ====================
-const WHATSNEW_KEY = 'keo-whatsnew-2026-09';
+const WHATSNEW_KEY = 'keo-whatsnew-2026-09-paseos';
 document.getElementById('btnWhatsNewOk').onclick = () => closeModal('modalWhatsNew');
 try {
   if (!localStorage.getItem(WHATSNEW_KEY)) {
