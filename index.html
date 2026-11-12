@@ -1265,6 +1265,273 @@
   .toast-action { background: #FFFFFF; }
   @media (prefers-color-scheme: dark) { .toast-action { background: #141414; color: #fff; } }
   .chip.active { background: var(--strong); color: var(--on-strong); }
+
+  /* ==================== PULIDO iPhone (2026-11-11) ==================== */
+  /* 1) Modo oscuro: los pasteles de "calma" son solo para modo claro */
+  :root { color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --t-hambre: #3B3218; --t-ok: #1D3A28; --t-todo: #28253F; --t-late: #40261A;
+      --t-walk: #3E1F2B; --t-love: #3E1F2B; --t-out: #4A1D18; --t-night: #1E2148; --t-ink: #F3F1EC;
+    }
+    .hero .say { background: #F3F1EC; color: #141414; }
+    .hero[data-s="durmiendo"] .say { background: #F3F1EC; color: #1E2148; }
+    .th span, .th svg { opacity: .72; }
+    .food-mini[data-lvl="mid"] .th span { color: #F2C94C; }
+    .rank-tile.total .rank-num { color: var(--t-ink); }
+  }
+
+  /* 2) Keo quieto (sin vaivén) y alineado a los píxeles de la pantalla (ver snapKeos) */
+  .keo-pic { animation: none; }
+  .hero[data-s="durmiendo"] .keo-pic { animation: none; }
+  .keo-pic.hop { animation: keoHop .5s steps(5, end); }
+
+  /* 3) Inputs de hora/fecha en iPhone: Safari los recorta si no se les saca la apariencia nativa */
+  .edit-time-input { -webkit-appearance: none; appearance: none; display: block; width: 100%; min-width: 0; min-height: 52px; line-height: 1.25; font-size: 17px; border-radius: 14px; }
+  input[type="time"].edit-time-input, input[type="date"].edit-time-input { padding: 0 14px; display: flex; align-items: center; }
+  .edit-time-input::-webkit-date-and-time-value { text-align: left; min-height: 1.25em; margin: 0; }
+  .edit-time-input::-webkit-datetime-edit { padding: 0; }
+  .kg-input-row .edit-time-input { flex: 1; }
+  .modal { padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px)); }
+  .modal-text { margin-bottom: 14px; }
+
+  /* 4) Sin degradado sobre el contenido (cortaba los bloques a la mitad) y sin texto en ↻ */
+  body::after { display: none; }
+  #syncText { display: none !important; }
+  .greeting { overflow: visible; text-overflow: clip; }
+
+  /* 5) Detalles */
+  .tab-bar { bottom: max(14px, calc(env(safe-area-inset-bottom) + 6px)); }
+  .w7-col.today span { color: var(--text); }
+  .sec-label { margin-top: 18px; }
+
+  /* Barra de pestañas fija abajo (estilo iOS): el contenido nunca queda tapado */
+  .tab-bar {
+    left: 0; right: 0; bottom: 0; transform: none; width: auto; max-width: none;
+    border-radius: 0; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    justify-content: space-around; gap: 4px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 -1px 0 var(--border); animation: none;
+  }
+  @media (prefers-color-scheme: dark) { .tab-bar { box-shadow: 0 -1px 0 var(--border); } }
+  .tab-btn { color: var(--text-tertiary); padding: 0 14px; }
+  .tab-btn.active { background: var(--strong); color: var(--on-strong); }
+  @media (prefers-color-scheme: dark) { .tab-btn.active { background: var(--strong); color: var(--on-strong); } }
+  body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  @media (min-width: 520px) { .tab-bar { left: 50%; right: auto; width: 480px; transform: translateX(-50%); } }
+
+  /* Ranking y Mes más tranquilos: totales y resúmenes neutros */
+  .rank-tile.total { background: var(--surface-2); color: var(--text); box-shadow: none; }
+  .rank-tile.total .rank-tile-name, .rank-tile.total .rank-unit, .rank-tile.total .rank-sub, .rank-tile.total .rank-num { color: var(--text); }
+  .rank-tile.total .rank-tile-name, .rank-tile.total .rank-unit, .rank-tile.total .rank-sub { opacity: .7; }
+  .cal-sum .ok, .cal-sum .wk { background: var(--surface); color: var(--text); box-shadow: var(--tile-sh), inset 0 0 0 1px var(--border); }
+
+  /* =====================================================================
+     MOVIMIENTO (2026-11-11) — reglas: entradas ease-out, movimientos ease-in-out,
+     sin rebote en UI de todos los días, salidas 20% más cortas, press a 0.97 sin
+     tween mientras se mantiene, stagger de 30 ms, popovers desde 0.95.
+     ===================================================================== */
+  :root {
+    --ease-out: cubic-bezier(.22, 1, .36, 1);
+    --ease-in: cubic-bezier(.4, 0, 1, 1);
+    --ease-io: cubic-bezier(.65, 0, .35, 1);
+  }
+
+  /* Press: 0.97, entra casi instantáneo (no se anima mientras está apretado) y vuelve suave */
+  button, .tile[role="button"], .food-ration, .week7, .food-mini, .walk-row, .cal-slot-tap {
+    transition: transform .22s var(--ease-out), background-color .45s ease, color .3s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  button:active, .tile[role="button"]:active, .food-ration:active, .week7:active, .food-mini:active, .walk-row:active {
+    transform: scale(.97) !important; transition-duration: .06s;
+  }
+
+  /* Cambio de pestaña: los bloques entran escalonados (30 ms) y los números se asientan después */
+  .tab-section.anim-in { animation: none; }
+  .stg { animation: stgIn .32s var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 30ms); }
+  .stg .big, .stg .hero-num, .stg .fh-num, .stg .rank-num { animation: detailIn .3s var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 30ms + 90ms); }
+  @keyframes stgIn { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes detailIn { from { opacity: 0; transform: translateY(3px); } }
+
+  /* Toast: entra desde arriba (0.95 → 1, ease-out) y sale por donde vino, más rápido */
+  .toast {
+    opacity: 0; pointer-events: none;
+    transform: translateX(-50%) translateY(-18px) scale(.95);
+    transition: transform .2s var(--ease-in), opacity .16s var(--ease-in);
+  }
+  .toast.show {
+    opacity: 1; pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+    transition: transform .26s var(--ease-out), opacity .2s var(--ease-out);
+  }
+
+  /* Modales: suben con ease-out (280 ms) y bajan con ease-in (220 ms) */
+  .modal-overlay { display: flex; visibility: hidden; opacity: 0; pointer-events: none; transition: opacity .22s var(--ease-in), visibility 0s linear .22s; }
+  .modal-overlay.show { visibility: visible; opacity: 1; pointer-events: auto; transition: opacity .28s var(--ease-out), visibility 0s; }
+  .modal { transform: translateY(100%); transition: transform .22s var(--ease-in); }
+  .modal-overlay.show .modal { transform: none; transition: transform .28s var(--ease-out); }
+  @media (min-width: 480px) {
+    .modal { transform: translateY(12px) scale(.95); opacity: 0; transition: transform .2s var(--ease-in), opacity .2s var(--ease-in); }
+    .modal-overlay.show .modal { transform: none; opacity: 1; transition: transform .26s var(--ease-out), opacity .26s var(--ease-out); }
+  }
+
+  /* Sin rebotes: globo, check, racha, barras */
+  .say.pop { animation: sayIn .24s var(--ease-out); transform-origin: 0% 100%; }
+  @keyframes sayIn { from { opacity: 0; transform: translateY(4px) scale(.95); } to { opacity: 1; transform: none; } }
+  .mtile.just-done { animation: none; }
+  .mtile.just-done .chk { animation: chkIn .26s var(--ease-out), okPulse .7s .12s var(--ease-out); }
+  @keyframes chkIn { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: none; } }
+  @keyframes okPulse { from { box-shadow: 0 0 0 0 rgba(47, 138, 74, .45); } to { box-shadow: 0 0 0 14px rgba(47, 138, 74, 0); } }
+  .streak .big.bump { animation: numPulse .42s var(--ease-out); }
+  @keyframes numPulse { 40% { transform: scale(1.06); } }
+  .w7-col i { animation: w7In .32s var(--ease-out) backwards; }
+  @keyframes w7In { from { transform: scaleY(0); opacity: 0; } }
+  .bag-fill { transition: transform .9s var(--ease-io); }
+  .chart-tip { animation: tipIn .18s var(--ease-out); transform-origin: 50% 100%; }
+  @keyframes tipIn { from { opacity: 0; transform: translateX(-50%) translateY(4px) scale(.95); } to { opacity: 1; transform: translateX(-50%); } }
+
+  /* Pulso de confirmación (bolsa cargada, paseo registrado) */
+  .pulse { animation: tilePulse .7s var(--ease-out); }
+  @keyframes tilePulse { from { box-shadow: var(--tile-sh), 0 0 0 0 color-mix(in srgb, var(--strong) 30%, transparent); } to { box-shadow: var(--tile-sh), 0 0 0 14px transparent; } }
+
+  /* Íconos y textos que cambian: crossfade con blur */
+  .tab-btn.active span { animation: blurIn .22s var(--ease-out); }
+  .mtile[data-st="done"] .meal-actions { animation: blurIn .24s var(--ease-out) both; }
+  @keyframes blurIn { from { opacity: 0; filter: blur(4px); transform: translateY(3px); } to { opacity: 1; filter: none; transform: none; } }
+
+  /* Keo: la cara vieja se desvanece sobre la nueva (estados que se superponen) */
+  .keo-ghost { pointer-events: none; transition: opacity .2s var(--ease-out), filter .2s var(--ease-out); }
+  .keo-ghost.out { opacity: 0; filter: blur(2px); }
+  /* Color del bloque de Keo: se revela con una máscara circular que sale de Keo */
+  .hero > .th { position: relative; z-index: 2; }
+  .hero .keo-pic { z-index: 1; }
+  .hero .say { z-index: 3; }
+  .hero-wash { position: absolute; inset: 0; z-index: 0; pointer-events: none; clip-path: circle(0px at var(--wx) var(--wy)); transition: clip-path .55s var(--ease-io); }
+  .hero-wash.go { clip-path: circle(150% at var(--wx) var(--wy)); }
+  /* Corazones: suben en arco, no en línea recta */
+  @keyframes heartUp {
+    0% { opacity: 0; transform: translate(0, 0); }
+    15% { opacity: 1; }
+    50% { transform: translate(6px, -24px); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(0, -48px); }
+  }
+  .hearts img:nth-child(2) { animation-name: heartUpL !important; }
+  @keyframes heartUpL {
+    0% { opacity: 0; transform: translate(0, 0); }
+    15% { opacity: 1; }
+    50% { transform: translate(-6px, -24px); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(0, -48px); }
+  }
+
+  /* Segmentados: la "perilla" se desliza (ease-in-out) y se estira 12% mientras viaja */
+  .who-segment { position: relative; }
+  .seg-knob { position: absolute; top: 4px; bottom: 4px; left: 0; width: 0; border-radius: 99px; background: var(--strong); z-index: 0; pointer-events: none; transition: transform .3s var(--ease-io), width .3s var(--ease-io), opacity .2s ease; }
+  .seg-knob.stretch { animation: knobStretch .3s var(--ease-io); }
+  @keyframes knobStretch { 50% { scale: 1.12 1; } }
+  .who-segment .who-btn { position: relative; z-index: 1; }
+  .who-segment.has-knob .who-btn.active { background: transparent !important; box-shadow: none; color: var(--on-strong); }
+  .who-segment .who-btn { transition: color .25s var(--ease-io), transform .22s var(--ease-out); }
+
+  /* Rubber band al llegar a un límite */
+  .rubber { animation: rubber .36s var(--ease-out); }
+  @keyframes rubber { 0% { transform: none; } 30% { transform: translateX(var(--rb, 8px)); } 100% { transform: none; } }
+  .week-nav button.edge { opacity: .35; }
+
+  /* Transición compartida (misma "layoutId"): la bolsa de Hoy se transforma en la de Comida */
+  #foodMiniBag, #foodHeroBag { view-transition-name: food-bag; }
+  .tab-bar { view-transition-name: tab-bar; }
+  ::view-transition-old(root) { animation: vtOut .16s var(--ease-in) both; }
+  ::view-transition-new(root) { animation: vtIn .22s var(--ease-out) both; }
+  ::view-transition-group(food-bag) { animation-duration: .38s; animation-timing-function: var(--ease-io); }
+  ::view-transition-group(tab-bar) { animation-duration: .2s; }
+  @keyframes vtOut { to { opacity: 0; } }
+  @keyframes vtIn { from { opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stg, .stg .big, .seg-knob.stretch, .rubber, .pulse, .hero-wash { animation: none !important; transition: none !important; }
+  }
+
+  /* =====================================================================
+     OFICIO (2026-11-11): tipografía, color, toques, carga y estados vacíos
+     ===================================================================== */
+  /* Tipografía: kerning, sin viudas/huérfanas, tracking por tamaño, números tabulares */
+  html { font-kerning: normal; text-rendering: optimizeLegibility; line-height: 1.4; }
+  .title, .modal-title, .say, .wn-body strong, .walk-empty b { text-wrap: balance; }
+  .modal-text, .food-note, .wn-body, .sub, .walk-empty span, .ration-info, .lead { text-wrap: pretty; }
+  .big, .hero-num, .fh-num b, .rank-num, .w7-key, .lm-bar, .stepper input, .wk-sum-num, .walk-row-sub { font-variant-numeric: tabular-nums; }
+  .modal-text, .food-note, .wn-body { line-height: 1.5; }
+  .btn-feed, .big-cta, .modal-btn, .tab-btn span { letter-spacing: -0.005em; }
+  .title, .big, .hero-num, .fh-num b, .rank-num { font-feature-settings: "kern" 1, "tnum" 1; }
+
+  /* Seguridad de bordes del iPhone (también horizontal) */
+  body { padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); }
+
+  /* Toques de al menos 44 px */
+  .me-btn { width: 44px; height: 44px; }
+  .sync-indicator { min-width: 44px; min-height: 44px; justify-content: center; padding: 0; }
+  .week-nav button, .cal-nav { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; }
+  .week-nav button svg, .cal-nav svg { width: 20px; height: 20px; }
+  .chip { min-height: 44px; padding: 0 18px; }
+  .toast-action { min-height: 40px; padding: 0 15px; }
+  .cal-slot-tap { padding: 6px 8px; margin: -6px -8px; }
+  .stepper button { display: grid; place-items: center; }
+  .stepper button svg { width: 24px; height: 24px; }
+
+  /* Barra de pestañas sin saltos de layout: ancho fijo por pestaña, ícono + nombre siempre */
+  .tab-bar { justify-content: space-around; padding-top: 6px; }
+  .tab-btn { flex: 1; max-width: 96px; flex-direction: column; gap: 3px; min-height: 52px; padding: 0; background: transparent !important; color: var(--text-tertiary); border-radius: 14px; }
+  .tab-btn span, .tab-btn.active span { display: block; font-size: 11px; font-weight: 700; animation: none; transition: color .2s ease; }
+  .tab-btn svg { width: 22px; height: 22px; padding: 4px 16px; box-sizing: content-box; border-radius: 99px; transition: background-color .25s var(--ease-io), color .2s ease; }
+  .tab-btn.active { color: var(--text); }
+  .tab-btn.active svg { background: var(--strong); color: var(--on-strong); }
+
+  /* Affordance: lo que se toca muestra su flecha */
+  .th .th-chev { margin-left: 8px; font-size: 18px; line-height: 1; opacity: .45; text-transform: none; letter-spacing: 0; }
+
+  /* Skeleton mientras llega el primer dato (sin caché): mantiene el lugar, no salta */
+  .is-loading .mtile .big, .is-loading .mtile .sub, .is-loading #foodMiniBig, .is-loading #foodMiniSub,
+  .is-loading #streakNum, .is-loading #streakSub, .is-loading #lastMealAgo, .is-loading #lastMealSub {
+    color: transparent !important; display: block; width: 62%; min-height: 1em; border-radius: 8px;
+    background: linear-gradient(90deg, var(--surface-2) 25%, color-mix(in oklab, var(--surface-2) 45%, var(--surface)) 50%, var(--surface-2) 75%);
+    background-size: 200% 100%; animation: shimmer 1.3s linear infinite;
+  }
+  .is-loading .mtile .sub, .is-loading #foodMiniSub, .is-loading #streakSub, .is-loading #lastMealSub { width: 82%; height: 12px; min-height: 12px; }
+  .is-loading .mtile .btn-feed, .is-loading .mtile .meal-actions, .is-loading .mtile .chk, .is-loading .w7-cols, .is-loading .w7-key, .is-loading .flames, .is-loading .lm-bar { visibility: hidden; }
+  .is-loading .user-circle { display: none; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* Estados vacíos con Keo */
+  .walk-empty { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 22px 20px 20px; }
+  .walk-empty b { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+  .walk-empty span { font-size: 13px; color: var(--text-secondary); max-width: 26ch; }
+  .empty-keo { image-rendering: pixelated; margin-bottom: 4px; }
+
+  /* Bolsa nueva: lo secundario aparece solo si hace falta */
+  .date-line { display: flex; align-items: center; gap: 6px; margin-top: 18px; font-size: 15px; color: var(--text-secondary); }
+  .date-line b { color: var(--text); font-weight: 700; }
+  .link-inline { background: none; border: 0; padding: 0 4px; min-height: 44px; font: inherit; font-weight: 700; color: var(--text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .reveal { animation: blurIn .24s var(--ease-out); }
+
+  /* Neutros teñidos (cálidos) en OKLCH: los grises se ven elegidos, no por defecto */
+  @supports (color: oklch(0 0 0)) {
+    :root {
+      --bg: oklch(0.972 0.007 85); --surface: oklch(0.996 0.002 85); --surface-2: oklch(0.948 0.009 85);
+      --text: oklch(0.205 0.01 60); --text-secondary: oklch(0.5 0.014 70); --text-tertiary: oklch(0.69 0.013 75);
+      --border: oklch(0.915 0.011 85); --separator: oklch(0.915 0.011 85);
+      --strong: oklch(0.205 0.01 60); --on-strong: oklch(0.99 0.004 85);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: oklch(0.155 0.006 60); --surface: oklch(0.21 0.008 60); --surface-2: oklch(0.255 0.009 60);
+        --text: oklch(0.955 0.008 85); --text-secondary: oklch(0.73 0.012 75); --text-tertiary: oklch(0.53 0.011 70);
+        --border: oklch(0.29 0.009 60); --separator: oklch(0.29 0.009 60);
+        --strong: oklch(0.955 0.008 85); --on-strong: oklch(0.2 0.01 60);
+      }
+    }
+  }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -1348,7 +1615,7 @@
     </div>
     <div class="sec-label">Esta semana</div>
     <div class="tile span white week7" id="week7" role="button" aria-label="Ver ranking">
-      <div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V12h4v8M10 20V5h4v15M16 20v-6h4v6"/></svg><span>Comidas · 7 días</span><span class="w7-key" id="week7Total"></span></div>
+      <div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V12h4v8M10 20V5h4v15M16 20v-6h4v6"/></svg><span>Comidas · 7 días</span><span class="w7-key" id="week7Total"></span><span class="th-chev">›</span></div>
       <div class="w7-cols" id="week7Cols"></div>
       <div class="w7-leg" id="week7Leg"></div>
     </div>
@@ -1386,8 +1653,8 @@
         <div class="week-range" id="weekRange">—</div>
       </div>
       <div class="week-nav">
-        <button id="weekPrev" aria-label="Semana anterior">‹</button>
-        <button id="weekNext" aria-label="Semana siguiente">›</button>
+        <button id="weekPrev" aria-label="Semana anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:translateX(-.5px)"><path d="M14.5 6l-6 6 6 6"/></svg></button>
+        <button id="weekNext" aria-label="Semana siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:translateX(.5px)"><path d="M9.5 6l6 6-6 6"/></svg></button>
       </div>
     </div>
     <div class="wk-strip" id="weekStrip"></div>
@@ -1461,9 +1728,9 @@
 
 <section class="tab-section" id="tab-mes" style="display:none">
   <div class="cal-header">
-    <button class="cal-nav" id="calPrev" aria-label="Mes anterior">‹</button>
+    <button class="cal-nav" id="calPrev" aria-label="Mes anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:translateX(-.5px)"><path d="M14.5 6l-6 6 6 6"/></svg></button>
     <div class="cal-month" id="calMonthLabel">—</div>
-    <button class="cal-nav" id="calNext" aria-label="Mes siguiente">›</button>
+    <button class="cal-nav" id="calNext" aria-label="Mes siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:translateX(.5px)"><path d="M9.5 6l6 6-6 6"/></svg></button>
   </div>
   <div class="tile white cal-tile"><div class="cal-grid" id="calGrid"></div></div>
   <div class="bento cal-sum" id="calSum"></div>
@@ -1534,10 +1801,15 @@
     <div class="modal-title">Nueva bolsa</div>
     <div class="modal-text">¿De cuántos kilos es?</div>
     <div class="kg-chips" id="bagChips"></div>
-    <div class="edit-label">Otro peso</div>
-    <div class="kg-input-row"><input type="number" inputmode="decimal" step="0.5" min="0.5" max="60" class="edit-time-input" id="bagKgInput" placeholder="Ej: 12"><span>kg</span></div>
-    <div class="edit-label">La abrieron el</div>
-    <input type="date" class="edit-time-input" id="bagDateInput">
+    <div id="bagOtherWrap" hidden>
+      <div class="edit-label">Otro peso</div>
+      <div class="kg-input-row"><input type="number" inputmode="decimal" step="0.5" min="0.5" max="60" class="edit-time-input" id="bagKgInput" placeholder="Ej: 12"><span>kg</span></div>
+    </div>
+    <div class="date-line" id="bagDateLine">La abrieron <b id="bagDateTxt">hoy</b><button class="link-inline" id="bagDateEdit" type="button">Cambiar</button></div>
+    <div id="bagDateWrap" hidden>
+      <div class="edit-label">La abrieron el</div>
+      <input type="date" class="edit-time-input" id="bagDateInput">
+    </div>
     <label class="carry" id="bagCarryRow"><input type="checkbox" id="bagCarry"><span>Sumar lo que quedaba de la anterior (<b id="bagCarryKg"></b>)</span></label>
     <div class="modal-actions" style="margin-top: 20px;">
       <button class="modal-btn" onclick="closeModal('modalBag')">Cancelar</button>
@@ -1552,9 +1824,9 @@
     <div class="modal-title">Ración por comida</div>
     <div class="modal-text">La misma para el desayuno y la cena. Cambiarla afecta de acá en adelante.</div>
     <div class="stepper">
-      <button id="rationMinus" aria-label="Menos">−</button>
+      <button id="rationMinus" aria-label="Menos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h12"/></svg></button>
       <div class="sv"><input type="number" inputmode="numeric" id="rationInput" min="10" max="1500"><span>g</span></div>
-      <button id="rationPlus" aria-label="Más">+</button>
+      <button id="rationPlus" aria-label="Más"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v12M6 12h12"/></svg></button>
     </div>
     <div class="ration-info" id="rationInfo"></div>
     <div class="modal-actions" style="margin-top: 20px;">
@@ -2578,7 +2850,7 @@ function renderWalks() {
     ' – ' + end.getDate() + ' ' + MONTH_ABBR[end.getMonth()];
   document.getElementById('weekRange').textContent =
     range + ' · ' + weekWalks.length + (weekWalks.length === 1 ? ' paseo' : ' paseos');
-  document.getElementById('weekNext').disabled = walkWeekOffset >= 0;
+  document.getElementById('weekNext').classList.toggle('edge', walkWeekOffset >= 0);
 
   document.getElementById('weekStrip').innerHTML = days.map((day, i) => {
     const list = walksOn(day.key);
@@ -2621,7 +2893,9 @@ function renderWalks() {
           '<span class="walk-row-sub">' + formatTime(w.timestamp) + '</span></span>' +
           ICON_ROW_EDIT +
         '</button>').join('')
-    : '<div class="walk-empty">' + (selected === todayKey ? 'Todavía no salió a pasear hoy' : 'Sin paseos este día') + '</div>';
+    : '<div class="walk-empty"><img class="empty-keo" src="' + keoSrc('paseo') + '" alt="" style="width:' + pxFit(72) + 'px;height:' + pxFit(72) + 'px">' +
+      '<b>' + (selected === todayKey ? 'Todavía no salió a pasear hoy' : 'Sin paseos este día') + '</b>' +
+      '<span>' + (selected === todayKey ? 'Cuando lo saquen, tocá «Registrar paseo».' : 'Si salió y no lo anotaron, cargalo con «+ Agregar».') + '</span></div>';
 }
 
 function shiftWalkWeek(delta) {
@@ -2694,6 +2968,7 @@ function quickWalk() {
   walkSelectedDay = null;
   if (navigator.vibrate) navigator.vibrate(10);
   addWalk({ id: newWalkId(), timestamp: Date.now(), dateKey: getDateKey(), who: state.currentUser });
+  pulseEl('walkCard');
 }
 
 // Modal para agregar en otro día/horario o editar uno existente
@@ -2747,7 +3022,7 @@ document.getElementById('btnWalkDelete').onclick = () => {
 document.getElementById('btnQuickWalk').onclick = quickWalk;
 document.getElementById('btnAddWalkDay').onclick = () => openWalkModal(walkSelectedDay || getDateKey(), null);
 document.getElementById('weekPrev').onclick = () => shiftWalkWeek(-1);
-document.getElementById('weekNext').onclick = () => shiftWalkWeek(1);
+document.getElementById('weekNext').onclick = () => { if (walkWeekOffset >= 0) { rubberBand(document.getElementById('weekStrip'), -1); return; } shiftWalkWeek(1); };
 
 document.getElementById('weekStrip').addEventListener('click', (e) => {
   const day = e.target.closest('.wk-day');
@@ -2951,9 +3226,7 @@ function switchTab(tab) {
   });
   // Fundido suave al entrar a la pestaña
   const sec = document.getElementById('tab-' + tab);
-  sec.classList.remove('anim-in');
-  void sec.offsetWidth; // reflow para reiniciar la animación
-  sec.classList.add('anim-in');
+  staggerIn(sec);
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
@@ -2963,10 +3236,11 @@ function switchTab(tab) {
   if (tab === 'mes') renderCalendar();
   if (tab === 'paseos') renderWalks();
   if (tab === 'comida') { foodDaysShown = null; renderFood(); }
+  if (typeof snapKeos === 'function') setTimeout(snapKeos, 450);
 }
 
 document.querySelectorAll('.tab-btn').forEach(b => {
-  b.addEventListener('click', () => switchTab(b.dataset.tab));
+  b.addEventListener('click', () => goTab(b.dataset.tab));
 });
 
 // Selector de período del Ranking (chips)
@@ -3061,8 +3335,7 @@ setInterval(() => { renderAll(); }, 60000);
 // durante la carga), asegurar que el contenido sea visible igual.
 window.addEventListener('load', () => {
   // (.tab-section no va acá: su fundido al cambiar de pestaña se aplica después del load)
-  document.querySelectorAll('.hero, .meal, .history-card, .who-segment, .tab-bar')
-    .forEach(el => { el.style.animation = 'none'; });
+  // (ya no hace falta: las entradas nuevas son cortas y no dejan nada invisible)
 });
 
 // ==================== NOVEDADES (una sola vez por dispositivo) ====================
@@ -3124,9 +3397,10 @@ function renderKeoAvatar() {
   const key = m.k + '|' + say;
   if (key === keoLastKey) return; // nada cambió: no repetir animaciones
   const prev = hero.dataset.s;
-  hero.dataset.s = m.k;
+  if (keoLastKey && typeof washHero === 'function') washHero(hero, () => { hero.dataset.s = m.k; });
+  else hero.dataset.s = m.k;
   const img = document.getElementById('keoImg');
-  img.src = keoSrc(m.k);
+  if (typeof swapKeoFace === 'function') swapKeoFace(img, keoSrc(m.k)); else img.src = keoSrc(m.k);
   const sayEl = document.getElementById('keoSay');
   sayEl.textContent = say;
   if (keoLastKey) { sayEl.classList.remove('pop'); void sayEl.offsetWidth; sayEl.classList.add('pop'); }
@@ -3192,7 +3466,7 @@ function renderWeek7() {
     const key = getDateKey(d), rec = map[key] || {};
     const block = meal => {
       const r = rec[meal];
-      if (r && USERS[r.who]) { counts[r.who]++; total++; return '<i style="background:' + USERS[r.who].color + ';animation-delay:' + (k++ * 25) + 'ms"></i>'; }
+      if (r && USERS[r.who]) { counts[r.who]++; total++; return '<i style="background:' + USERS[r.who].color + ';animation-delay:' + (k++ * 30) + 'ms"></i>'; }
       return '<i class="' + (key === todayKey ? 'pend' : 'empty') + '"></i>';
     };
     const top = block('noche'), bottom = block('manana');
@@ -3237,7 +3511,7 @@ function renderMe() {
 }
 function openWhoModal() { renderWhoButtons(); openModal('modalWho'); }
 document.getElementById('meBtn').addEventListener('click', openWhoModal);
-document.getElementById('week7').addEventListener('click', () => switchTab('scoring'));
+document.getElementById('week7').addEventListener('click', () => goTab('scoring'));
 document.querySelectorAll('[data-keo]').forEach(i => { i.src = keoSrc(i.dataset.keo); });
 
 // Tamaño "pixel perfect": el más grande que no pase de n y sea múltiplo exacto de la grilla
@@ -3255,7 +3529,26 @@ function fitKeoSizes() {
 }
 fitKeoSizes();
 
+function snapToPixels(img) {
+  if (!img || !img.offsetParent) return;
+  img.style.translate = '0px 0px';
+  const r = img.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+  const dx = (Math.round(r.left * d) - r.left * d) / d;
+  const dy = (Math.round(r.top * d) - r.top * d) / d;
+  img.style.translate = dx.toFixed(3) + 'px ' + dy.toFixed(3) + 'px';
+}
+let snapRaf = 0;
+function snapKeos() {
+  cancelAnimationFrame(snapRaf);
+  snapRaf = requestAnimationFrame(() => document.querySelectorAll('.keo-pic, .rank-keo').forEach(snapToPixels));
+}
+window.addEventListener('resize', () => { fitKeoSizes(); snapKeos(); });
+window.addEventListener('scroll', snapKeos, { passive: true });
+document.fonts && document.fonts.ready.then(snapKeos);
+
 function renderHoyExtras() {
+  document.body.classList.toggle('is-loading', !state.firstSyncDone);
+  snapKeos();
   renderStreak();
   renderWeek7();
   renderLastMeal();
@@ -3451,7 +3744,8 @@ function renderFood() {
       '<span class="walk-row-main"><span class="walk-row-name">' + fmtKg(b.grams) + '</span>' +
       '<span class="walk-row-sub">' + fmtDayShort(b.timestamp) + (b.who ? ' · ' + b.who : '') + '</span></span>' +
       '<span class="food-dur' + (next ? '' : ' now') + '">' + right + '</span></div>';
-  }).join('') : '<div class="walk-empty">Todavía no hay bolsas cargadas</div>';
+  }).join('') : '<div class="walk-empty"><img class="empty-keo" src="' + keoSrc('comiendo') + '" alt="" style="width:' + pxFit(72) + 'px;height:' + pxFit(72) + 'px">' +
+      '<b>Todavía no hay bolsas</b><span>Cargá la que están usando con «+ Nueva bolsa» y la app calcula cuánto le queda.</span></div>';
 
   maybeFoodAlert(c, lvl);
 }
@@ -3469,7 +3763,7 @@ function maybeFoodAlert(c, lvl) {
 // Escritura de eventos (misma fila serial que el resto)
 function addFoodEvent(ev, okMsg) {
   return walkWrite({ action: 'addFood', id: ev.id, timestamp: ev.timestamp, type: ev.type, grams: ev.grams, who: ev.who },
-    () => { state.food.push(ev); },
+    () => { state.food.push(ev); pulseEl('foodHero'); pulseEl('foodMini'); },
     () => { ev._failed = true; state.food = state.food.filter(e => e.id !== ev.id); },
     okMsg, () => removeFoodEvent(ev));
 }
@@ -3482,24 +3776,49 @@ function removeFoodEvent(ev) {
 
 // ---- Modal: nueva bolsa
 let bagKgSel = null;
+let bagOther = false;
 function renderBagChips() {
   document.getElementById('bagChips').innerHTML = BAG_SIZES.map(k =>
-    '<button class="chip' + (bagKgSel === k ? ' active' : '') + '" data-kg="' + k + '">' + k.toLocaleString('es-AR') + ' kg</button>').join('');
+    '<button class="chip' + (!bagOther && bagKgSel === k ? ' active' : '') + '" data-kg="' + k + '">' + k.toLocaleString('es-AR') + ' kg</button>').join('') +
+    '<button class="chip' + (bagOther ? ' active' : '') + '" data-kg="other">Otro…</button>';
+  const wrap = document.getElementById('bagOtherWrap');
+  if (wrap.hidden === bagOther) { wrap.hidden = !bagOther; if (bagOther) wrap.classList.add('reveal'); }
 }
 document.getElementById('bagChips').addEventListener('click', e => {
   const b = e.target.closest('[data-kg]');
   if (!b) return;
+  if (b.dataset.kg === 'other') {
+    bagOther = true; bagKgSel = null;
+    renderBagChips();
+    setTimeout(() => document.getElementById('bagKgInput').focus(), 50);
+    return;
+  }
+  bagOther = false;
   bagKgSel = Number(b.dataset.kg);
   document.getElementById('bagKgInput').value = '';
   renderBagChips();
+});
+document.getElementById('bagDateEdit').addEventListener('click', () => {
+  const w = document.getElementById('bagDateWrap');
+  w.hidden = false; w.classList.add('reveal');
+  document.getElementById('bagDateLine').hidden = true;
+});
+document.getElementById('bagDateInput').addEventListener('change', e => {
+  const v = e.target.value;
+  document.getElementById('bagDateTxt').textContent = !v || v === getDateKey() ? 'hoy' : 'el ' + fmtDayShort(new Date(v + 'T12:00:00').getTime());
 });
 document.getElementById('bagKgInput').addEventListener('input', () => { bagKgSel = null; renderBagChips(); });
 function openBagModal() {
   const c = foodCalc();
   const last = foodSorted().filter(e => e.type === 'bag').pop();
   bagKgSel = last ? Number(last.grams) / 1000 : 15;
-  if (!BAG_SIZES.includes(bagKgSel)) { document.getElementById('bagKgInput').value = bagKgSel; bagKgSel = null; }
+  bagOther = !BAG_SIZES.includes(bagKgSel);
+  if (bagOther) { document.getElementById('bagKgInput').value = bagKgSel; bagKgSel = null; }
   else document.getElementById('bagKgInput').value = '';
+  document.getElementById('bagOtherWrap').hidden = !bagOther;
+  document.getElementById('bagDateWrap').hidden = true;
+  document.getElementById('bagDateLine').hidden = false;
+  document.getElementById('bagDateTxt').textContent = 'hoy';
   renderBagChips();
   document.getElementById('bagDateInput').value = getDateKey();
   document.getElementById('bagDateInput').max = getDateKey();
@@ -3513,7 +3832,7 @@ function openBagModal() {
 document.getElementById('btnNewBag').addEventListener('click', openBagModal);
 document.getElementById('btnBagConfirm').addEventListener('click', () => {
   const typed = parseFloat(String(document.getElementById('bagKgInput').value).replace(',', '.'));
-  const kg = bagKgSel || typed;
+  const kg = bagOther ? typed : (bagKgSel || typed);
   if (!kg || kg <= 0 || kg > 60) { showToast('Poné cuántos kilos trae la bolsa'); return; }
   const day = document.getElementById('bagDateInput').value || getDateKey();
   let ts = Date.now();
@@ -3539,8 +3858,8 @@ function openRationModal() {
 }
 document.getElementById('foodRationTile').addEventListener('click', openRationModal);
 document.getElementById('rationInput').addEventListener('input', rationInfo);
-document.getElementById('rationMinus').addEventListener('click', () => { const i = document.getElementById('rationInput'); i.value = Math.max(10, (Number(i.value) || 0) - 10); rationInfo(); });
-document.getElementById('rationPlus').addEventListener('click', () => { const i = document.getElementById('rationInput'); i.value = Math.min(1500, (Number(i.value) || 0) + 10); rationInfo(); });
+document.getElementById('rationMinus').addEventListener('click', () => { const i = document.getElementById('rationInput'); const v = Number(i.value) || 0; if (v <= 10) { rubberBand(i.closest('.sv'), -1); return; } i.value = Math.max(10, v - 10); rationInfo(); });
+document.getElementById('rationPlus').addEventListener('click', () => { const i = document.getElementById('rationInput'); const v = Number(i.value) || 0; if (v >= 1500) { rubberBand(i.closest('.sv'), 1); return; } i.value = Math.min(1500, v + 10); rationInfo(); });
 document.getElementById('btnRationConfirm').addEventListener('click', () => {
   const g = Math.round(Number(document.getElementById('rationInput').value));
   if (!g || g < 10 || g > 1500) { showToast('Poné la ración en gramos'); return; }
@@ -3562,9 +3881,119 @@ document.getElementById('btnAdjustConfirm').addEventListener('click', () => {
   addFoodEvent({ id: newFoodId(), timestamp: Date.now(), type: 'adjust', grams: Math.round(kg * 1000), who: state.currentUser || '' }, 'Listo, quedan ' + fmtKg(kg * 1000));
 });
 
-document.getElementById('foodMini').addEventListener('click', () => switchTab('comida'));
+document.getElementById('foodMini').addEventListener('click', () => goTab('comida'));
 document.getElementById('foodMiniBag').innerHTML = bagSVG('mini');
 document.getElementById('foodHeroBag').innerHTML = bagSVG('hero');
+
+
+// ==================== MOVIMIENTO ====================
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Entrada escalonada (30 ms entre bloques) al mostrar una pestaña
+function staggerIn(sec) {
+  sec.querySelectorAll('.who-segment').forEach(seg => requestAnimationFrame(() => syncKnob(seg)));
+  const els = sec.querySelectorAll(':scope > .bento > *, :scope > .bento, :scope > .big-cta, :scope > .link-btn, :scope > .walk-day-head, :scope > .walk-list, :scope > .week-card, :scope > .rank-metric, :scope > .period-chips, :scope > .cal-header, :scope > .cal-tile, :scope > #scoringContent > *, :scope > .food-note');
+  let i = 0;
+  els.forEach(el => {
+    if (el.classList.contains('bento')) return; // sus hijos se animan solos
+    el.classList.remove('stg');
+    el.style.setProperty('--i', Math.min(i++, 10));
+  });
+  void sec.offsetWidth;
+  els.forEach(el => { if (!el.classList.contains('bento')) el.classList.add('stg'); });
+  clearTimeout(sec._stgT);
+  sec._stgT = setTimeout(() => els.forEach(el => el.classList.remove('stg')), 900);
+}
+
+// Cambio de pestaña con View Transitions (crossfade + bolsa compartida) donde el navegador lo soporta
+function goTab(tab) {
+  const cur = ['hoy', 'paseos', 'comida', 'scoring', 'mes'].find(t => document.getElementById('tab-' + t).style.display !== 'none');
+  if (cur === tab) return;
+  if (document.startViewTransition && !reduceMotion()) document.startViewTransition(() => switchTab(tab));
+  else switchTab(tab);
+}
+
+// Pulso de confirmación sobre un bloque
+function pulseEl(id) {
+  const el = document.getElementById(id);
+  if (!el || reduceMotion()) return;
+  el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+  setTimeout(() => el.classList.remove('pulse'), 750);
+}
+
+// Rubber band: un empujoncito en la dirección del límite y vuelve
+function rubberBand(el, dir) {
+  if (!el || reduceMotion()) return;
+  el.style.setProperty('--rb', (dir < 0 ? -8 : 8) + 'px');
+  el.classList.remove('rubber'); void el.offsetWidth; el.classList.add('rubber');
+  if (navigator.vibrate) navigator.vibrate(6);
+}
+
+// Cara de Keo: la vieja se desvanece encima de la nueva
+function swapKeoFace(img, src) {
+  if (img.getAttribute('src') === src) return;
+  if (!img.getAttribute('src') || reduceMotion()) { img.src = src; return; }
+  const ghost = img.cloneNode();
+  ghost.removeAttribute('id');
+  ghost.classList.remove('hop');
+  ghost.classList.add('keo-ghost');
+  img.parentNode.insertBefore(ghost, img.nextSibling);
+  img.src = src;
+  requestAnimationFrame(() => requestAnimationFrame(() => ghost.classList.add('out')));
+  setTimeout(() => ghost.remove(), 260);
+}
+
+// Color del bloque de Keo: el nuevo se revela con un círculo que sale desde Keo
+function washHero(hero, apply) {
+  const before = getComputedStyle(hero).backgroundColor;
+  hero.style.transition = 'none'; // leer el color final sin la transición de por medio
+  apply();
+  const after = getComputedStyle(hero).backgroundColor;
+  if (before === after || reduceMotion() || !hero.offsetParent) { requestAnimationFrame(() => { hero.style.transition = ''; }); return; }
+  const img = document.getElementById('keoImg');
+  const wash = document.createElement('div');
+  wash.className = 'hero-wash';
+  wash.style.background = after;
+  wash.style.setProperty('--wx', (img.offsetLeft + img.offsetWidth / 2) + 'px');
+  wash.style.setProperty('--wy', (img.offsetTop + img.offsetHeight * 0.42) + 'px');
+  hero.style.backgroundColor = before;
+  hero.prepend(wash);
+  requestAnimationFrame(() => requestAnimationFrame(() => wash.classList.add('go')));
+  setTimeout(() => { hero.style.backgroundColor = ''; wash.remove(); requestAnimationFrame(() => { hero.style.transition = ''; }); }, 580);
+}
+
+// Perilla de los segmentados (Quién soy, Comidas/Paseos...): se desliza y se estira
+function syncKnob(seg) {
+  const act = seg.querySelector('.who-btn.active');
+  let k = seg.querySelector(':scope > .seg-knob');
+  const fresh = !k;
+  if (!k) { k = document.createElement('span'); k.className = 'seg-knob'; seg.prepend(k); seg.classList.add('has-knob'); }
+  if (!act || !seg.offsetParent && !seg.closest('.modal-overlay')) return;
+  const x = act.offsetLeft, w = act.offsetWidth;
+  if (!w) return;
+  const prev = seg.dataset.kx !== undefined ? Number(seg.dataset.kx) : null;
+  if (fresh && prev !== null) { // se re-dibujaron los botones: arrancar desde donde estaba
+    k.style.transition = 'none';
+    k.style.width = (seg.dataset.kw || w) + 'px';
+    k.style.transform = 'translateX(' + prev + 'px)';
+    void k.offsetWidth;
+    k.style.transition = '';
+  }
+  if (prev === null || reduceMotion()) k.style.transition = 'none';
+  k.style.width = w + 'px';
+  k.style.transform = 'translateX(' + x + 'px)';
+  if (prev !== null && prev !== x && !reduceMotion()) { k.classList.remove('stretch'); void k.offsetWidth; k.classList.add('stretch'); }
+  if (prev === null) requestAnimationFrame(() => { k.style.transition = ''; });
+  seg.dataset.kx = x; seg.dataset.kw = w;
+}
+document.querySelectorAll('.who-segment').forEach(seg => {
+  syncKnob(seg);
+  new MutationObserver(muts => {
+    if (muts.every(m => m.target.classList && m.target.classList.contains('seg-knob'))) return;
+    requestAnimationFrame(() => syncKnob(seg));
+  }).observe(seg, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+});
+window.addEventListener('resize', () => document.querySelectorAll('.who-segment').forEach(seg => { delete seg.dataset.kx; syncKnob(seg); }));
 
 // Init
 loadLocal();
