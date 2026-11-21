@@ -1532,6 +1532,113 @@
     }
   }
   [hidden] { display: none !important; }
+
+  /* =====================================================================
+     SALUD (2026-11-21): pipeta, baño y peso + avisos en Hoy
+     ===================================================================== */
+  :root { --t-care-late: #FBDDD5; --ring-track: #EEEAE2;
+    --ic-pipeta-bg: #FBE6D8; --ic-pipeta: #C2541E; --ic-bano-bg: #DDEBFA; --ic-bano: #3F63C4; --ic-peso-bg: #DDEFE0; --ic-peso: #2F8A4A; }
+  @media (prefers-color-scheme: dark) {
+    :root { --t-care-late: #4A1D18; --ring-track: #2B2B31;
+      --ic-pipeta-bg: #4D2A1A; --ic-pipeta: #FF9B6A; --ic-bano-bg: #1F2A4D; --ic-bano: #8FA8FF; --ic-peso-bg: #1F4D33; --ic-peso: #6ED68A; }
+  }
+  .salud-view, .rank-view { max-width: none; margin-bottom: 10px; }
+
+  .ct-ico { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
+  .ct-ico svg { width: 20px; height: 20px; }
+  .ct-ico[data-k="pipeta"] { background: var(--ic-pipeta-bg); color: var(--ic-pipeta); }
+  .ct-ico[data-k="bano"] { background: var(--ic-bano-bg); color: var(--ic-bano); }
+  .ct-ico[data-k="peso"] { background: var(--ic-peso-bg); color: var(--ic-peso); }
+  .walk-row .ct-ico { width: 34px; height: 34px; }
+  .walk-row .ct-ico svg { width: 18px; height: 18px; }
+
+  /* Bloque grande: lo próximo */
+  .care-hero { min-height: 184px; padding: 16px 16px 78px; color: var(--t-ink); background: var(--t-ok); box-shadow: none; }
+  .care-hero[data-st="soon"], .care-hero[data-st="today"] { background: var(--t-late); }
+  .care-hero[data-st="late"] { background: var(--t-care-late); }
+  .care-hero[data-st="none"] { background: var(--surface-2); }
+  .care-hero .big { font-size: 29px; max-width: 64%; }
+  .care-hero .sub { max-width: 60%; }
+  .care-hero .keo-pic { width: 144px; height: 144px; right: -4px; bottom: -8px; top: auto; }
+  .ch-btn {
+    position: absolute; left: 16px; bottom: 16px; min-height: 46px; padding: 0 20px; border: 0; border-radius: 99px;
+    background: var(--strong); color: var(--on-strong); font-family: inherit; font-size: 15px; font-weight: 800;
+    display: inline-flex; align-items: center; gap: 7px; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .ch-btn svg { width: 17px; height: 17px; }
+
+  /* Pipeta / Baño con anillo */
+  .care-tile { min-height: 156px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; }
+  .ct-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .ct-name { font-weight: 800; font-size: 18px; letter-spacing: -0.025em; margin-top: 12px; }
+  .care-tile .sub { margin-top: 2px; margin-bottom: 12px; }
+  .ct-last { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; }
+  .ct-last > span:first-child { color: var(--text-secondary); font-weight: 600; }
+  .ct-who { display: inline-flex; align-items: center; gap: 5px; }
+  .ring { position: relative; width: 52px; height: 52px; flex-shrink: 0; display: grid; place-items: center; color: var(--green); }
+  .ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .ring .tr { stroke: var(--ring-track); }
+  .ring .fg { transition: stroke-dasharray .6s var(--ease-out, ease-out); }
+  .ring b { position: relative; font-size: 14px; font-weight: 800; letter-spacing: -0.03em; }
+  .ring[data-st="soon"], .ring[data-st="today"] { color: var(--orange); }
+  .ring[data-st="late"] { color: var(--red); }
+  .ring[data-st="none"] { color: var(--text-tertiary); }
+  .h-date { font-size: 13px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+
+  /* Avisos en Hoy */
+  .care-alerts { grid-column: span 2; display: grid; gap: 10px; }
+  .care-alert { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 14px; cursor: pointer; }
+  .care-alert:active { transform: scale(.985); }
+  .care-alert[data-st="today"] { background: var(--t-late); box-shadow: none; }
+  .care-alert[data-st="late"] { background: var(--t-care-late); box-shadow: none; }
+  .care-alert .ct-ico { width: 44px; height: 44px; border-radius: 14px; }
+  .care-alert[data-st="today"] .ct-ico, .care-alert[data-st="late"] .ct-ico { background: var(--surface); }
+  .ca-txt { flex: 1; min-width: 0; }
+  .ca-name { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-top: 3px; }
+  .care-alert .sub { margin-top: 2px; }
+  .care-alert[data-st="soon"] .th span { color: var(--orange); opacity: 1; }
+  .care-alert[data-st="late"] .th span { color: var(--red); opacity: 1; }
+  .ca-btn {
+    flex-shrink: 0; min-height: 44px; padding: 0 14px; border: 0; border-radius: 99px; background: var(--strong); color: var(--on-strong);
+    font-family: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .ca-btn:active { transform: scale(.97); }
+
+  /* Peso */
+  .wt-hero { min-height: 182px; padding: 16px; color: var(--t-ink); background: var(--t-ok); box-shadow: none; }
+  .wt-hero[data-st="low"], .wt-hero[data-st="high"] { background: var(--t-late); }
+  .wt-hero[data-st="none"] { background: var(--surface-2); }
+  .wt-num { font-size: 60px; font-weight: 800; letter-spacing: -0.06em; line-height: .95; margin-top: 8px; }
+  .wt-num small { font-size: 22px; letter-spacing: -0.03em; margin-left: 4px; }
+  .wt-hero .sub { max-width: 62%; }
+  .wt-hero .sub .user-circle { vertical-align: -3px; }
+  .wt-pill { display: inline-flex; margin-top: 10px; padding: 5px 11px; border-radius: 99px; background: var(--surface); font-size: 12.5px; font-weight: 800; color: var(--green); max-width: 62%; }
+  .wt-hero[data-st="low"] .wt-pill, .wt-hero[data-st="high"] .wt-pill { color: var(--orange); }
+  .wt-hero .keo-pic { width: 128px; height: 128px; right: -4px; bottom: -6px; top: auto; }
+  .wt-range { margin: 10px 0 4px; flex-wrap: wrap; gap: 6px; }
+  .wt-range .chip { min-height: 34px; padding: 0 12px; font-size: 13px; }
+  #wtChart { margin-top: 6px; }
+  #wtChart svg { display: block; width: 100%; height: auto; overflow: visible; font-family: inherit; }
+  .wc-grid { stroke: var(--border); stroke-dasharray: 2 4; }
+  .wc-axis { font-size: 10.5px; font-weight: 600; fill: var(--text-tertiary); }
+  .wc-band { fill: var(--green); opacity: .12; }
+  .wc-band-t { font-size: 10.5px; font-weight: 700; fill: var(--green); }
+  .wc-line { fill: none; stroke: var(--text); stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+  .wc-dot { fill: var(--surface); stroke: var(--text); stroke-width: 2; }
+  .wc-dot.last { fill: var(--text); }
+  .wc-val { font-size: 11.5px; font-weight: 800; fill: var(--text); }
+  .wc-date { font-size: 11px; font-weight: 600; fill: var(--text-tertiary); }
+  .wc-note { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); text-align: center; margin-top: 6px; }
+  .wt-mini .big { font-size: 22px; }
+  #wtNextTile[data-st="late"] .big, #wtNextTile[data-st="today"] .big { color: var(--orange); }
+  .wt-d { font-size: 12.5px; font-weight: 700; color: var(--text-secondary); margin-left: 4px; }
+
+  /* Modal de cuidados */
+  .care-mode { margin-bottom: 4px; }
+  #careKindSeg { margin-bottom: 4px; }
+  #freqUnitSeg { margin-top: 2px; }
+  #freqInput { width: 90px; text-align: center; }
+  #carePaneFreq .ration-info { margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -1563,13 +1670,13 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1.6 11.2a1.6 1.6 0 0 1-1.6 1.8H6a1.6 1.6 0 0 1-1.6-1.8z"/><path d="M7 8l1-4h8l1 4"/><path d="M10 13h4"/></svg>
     <span>Comida</span>
   </button>
+  <button class="tab-btn" data-tab="salud">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg>
+    <span>Salud</span>
+  </button>
   <button class="tab-btn" data-tab="scoring">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
     <span>Ranking</span>
-  </button>
-  <button class="tab-btn" data-tab="mes">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg>
-    <span>Mes</span>
   </button>
 </nav>
 
@@ -1604,6 +1711,7 @@
         <button class="meal-action-btn undo" data-act="undo" data-meal="noche">Deshacer</button>
       </div>
     </div>
+    <div class="care-alerts" id="careAlerts" hidden></div>
     <div class="tile span food-mini" id="foodMini" data-lvl="none" role="button" aria-label="Ver la bolsa de comida">
       <div class="fm-bag" id="foodMiniBag"></div>
       <div class="fm-txt">
@@ -1699,7 +1807,69 @@
   <p class="food-note">Se descuenta una ración por comida: la que marcan, y si nadie la marca, igual a las 9:00 y a las 20:30 (Keo come igual). Si el cálculo se desfasa, corregí cuánto queda.</p>
 </section>
 
+<section class="tab-section" id="tab-salud" style="display:none">
+  <div class="who-segment salud-view" id="saludView">
+    <button class="who-btn active" data-v="care">Cuidados</button>
+    <button class="who-btn" data-v="weight">Peso</button>
+  </div>
+
+  <div class="salud-pane" id="saludCare">
+    <div class="bento">
+      <div class="tile span care-hero" id="careHero" data-st="none">
+        <div class="th"><span id="careHeroLabel">Lo próximo</span></div>
+        <div class="big" id="careHeroBig">—</div>
+        <div class="sub" id="careHeroSub"></div>
+        <img class="keo-pic" id="careHeroKeo" alt="">
+        <button class="ch-btn" id="careHeroBtn"></button>
+      </div>
+      <div class="tile white care-tile" id="careTile-pipeta" data-k="pipeta" role="button" aria-label="Pipeta"></div>
+      <div class="tile white care-tile" id="careTile-bano" data-k="bano" role="button" aria-label="Baño"></div>
+    </div>
+    <div class="walk-day-head"><div class="section-title">Historial</div><button class="walk-add-link" id="btnCareAdd">+ Agregar</button></div>
+    <div class="walk-list" id="careHistory"></div>
+  </div>
+
+  <div class="salud-pane" id="saludWeight" hidden>
+    <div class="bento">
+      <div class="tile span wt-hero" id="wtHero" data-st="none">
+        <div class="th"><span>Peso actual</span></div>
+        <div class="wt-num" id="wtNum">—</div>
+        <div class="sub" id="wtSub"></div>
+        <div class="wt-pill" id="wtPill" hidden></div>
+        <img class="keo-pic" data-keo="feliz" alt="">
+      </div>
+      <div class="tile span white wt-chart">
+        <div class="th"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg><span>Cómo viene</span></div>
+        <div class="period-chips wt-range" id="wtRange">
+          <button class="chip" data-m="3">3 meses</button>
+          <button class="chip active" data-m="6">6 meses</button>
+          <button class="chip" data-m="12">1 año</button>
+          <button class="chip" data-m="all">Todo</button>
+        </div>
+        <div id="wtChart"></div>
+      </div>
+      <div class="tile white wt-mini">
+        <div class="th"><span>Cambio</span></div>
+        <div class="big" id="wtDelta">—</div>
+        <div class="sub" id="wtDeltaSub"></div>
+      </div>
+      <div class="tile white wt-mini" id="wtNextTile">
+        <div class="th"><span>Próximo pesaje</span></div>
+        <div class="big" id="wtNext">—</div>
+        <div class="sub" id="wtNextSub">una vez por mes</div>
+      </div>
+    </div>
+    <button class="big-cta" id="btnWeightAdd">+ Anotar peso</button>
+    <div class="walk-day-head"><div class="section-title">Pesajes</div></div>
+    <div class="walk-list" id="wtHistory"></div>
+  </div>
+</section>
+
 <section class="tab-section" id="tab-scoring" style="display:none">
+  <div class="who-segment rank-view">
+    <button class="who-btn active" data-view="scoring">Estadísticas</button>
+    <button class="who-btn" data-view="mes">Calendario</button>
+  </div>
   <div class="who-segment rank-metric" id="rankMetric">
     <button class="who-btn active" data-metric="meals">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"></path><path d="M7 21h10"></path><path d="M19.5 12 22 6"></path><path d="M16.25 3c.27.1.8.53.75 1.36-.06.83-.93 1.2-1 2.02-.05.78.34 1.24.73 1.62"></path><path d="M11.25 3c.27.1.8.53.74 1.36-.05.83-.93 1.2-.98 2.02-.06.78.33 1.24.72 1.62"></path><path d="M6.25 3c.27.1.8.53.75 1.36-.06.83-.93 1.2-1 2.02-.05.78.34 1.24.74 1.62"></path></svg>
@@ -1727,6 +1897,10 @@
 </section>
 
 <section class="tab-section" id="tab-mes" style="display:none">
+  <div class="who-segment rank-view">
+    <button class="who-btn" data-view="scoring">Estadísticas</button>
+    <button class="who-btn active" data-view="mes">Calendario</button>
+  </div>
   <div class="cal-header">
     <button class="cal-nav" id="calPrev" aria-label="Mes anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:translateX(-.5px)"><path d="M14.5 6l-6 6 6 6"/></svg></button>
     <div class="cal-month" id="calMonthLabel">—</div>
@@ -1757,24 +1931,20 @@
 <div class="modal-overlay" id="modalWhatsNew">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Keo se renovó</div>
-    <div class="modal-text">Nueva cara para la app:</div>
+    <div class="modal-title">Novedad: Salud</div>
+    <div class="modal-text">Pestaña nueva abajo, entre Comida y Ranking:</div>
     <div class="wn-list">
       <div class="wn-item">
+        <div class="wn-pic" style="background:var(--t-late)"><img data-keo="impaciente" alt=""></div>
+        <div class="wn-body"><strong>Pipeta y baño.</strong> La app cuenta cuándo toca y avisa en Hoy una semana antes. Tocan «Ya se la di» y vuelve a contar desde ese día.</div>
+      </div>
+      <div class="wn-item">
         <div class="wn-pic" style="background:var(--t-ok)"><img data-keo="feliz" alt=""></div>
-        <div class="wn-body"><strong>Todo en bloques.</strong> Keo, las dos comidas, la racha y los paseos en una sola pantalla, sin scroll.</div>
+        <div class="wn-body"><strong>Peso de Keo.</strong> Anoten el peso una vez por mes y ven cómo viene contra su rango ideal.</div>
       </div>
       <div class="wn-item">
-        <div class="wn-pic" style="background:var(--t-love)"><img data-keo="enamorado" alt=""></div>
-        <div class="wn-body"><strong>Keo tiene caras nuevas.</strong> Se impacienta si se atrasa la comida, come, se pone feliz y a la noche se duerme. Tocalo y vas a ver.</div>
-      </div>
-      <div class="wn-item">
-        <div class="wn-pic" style="background:var(--t-night)"><img data-keo="durmiendo" alt=""></div>
-        <div class="wn-body"><strong>Racha sin olvidos.</strong> Cuenta los días seguidos con desayuno y cena. ¡No la corten!</div>
-      </div>
-      <div class="wn-item">
-        <div class="wn-pic" style="background:var(--t-hambre)"><img data-keo="comiendo" alt=""></div>
-        <div class="wn-body"><strong>Bolsa de comida.</strong> En la pestaña Comida cargan la bolsa y la ración, y la app avisa cuántos días quedan.</div>
+        <div class="wn-pic" style="background:var(--t-todo)"><img data-keo="guino" alt=""></div>
+        <div class="wn-body"><strong>¿Y el calendario?</strong> Ahora está dentro de Ranking, en «Calendario».</div>
       </div>
     </div>
     <div class="modal-actions">
@@ -1849,6 +2019,65 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modalCare">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="careModalTitle">Pipeta</div>
+    <div class="who-segment edit-who-row" id="careKindSeg">
+      <button class="who-btn active" data-k="pipeta">Pipeta</button>
+      <button class="who-btn" data-k="bano">Baño</button>
+    </div>
+    <div class="who-segment edit-who-row care-mode" id="careModeSeg">
+      <button class="who-btn active" data-mode="log">Anotar</button>
+      <button class="who-btn" data-mode="freq">Cada cuánto</button>
+    </div>
+    <div id="carePaneLog">
+      <div class="modal-text" id="careLogText">Desde ese día se vuelve a contar.</div>
+      <div class="edit-label">¿Cuándo?</div>
+      <input type="date" class="edit-time-input" id="careDateInput">
+      <div class="edit-label">¿Quién?</div>
+      <div class="who-segment edit-who-row" id="careWhoButtons"></div>
+    </div>
+    <div id="carePaneFreq" hidden>
+      <div class="stepper">
+        <button id="freqMinus" aria-label="Menos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h12"/></svg></button>
+        <div class="sv"><input type="number" inputmode="numeric" id="freqInput" min="1" max="99"></div>
+        <button id="freqPlus" aria-label="Más"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v12M6 12h12"/></svg></button>
+      </div>
+      <div class="who-segment edit-who-row" id="freqUnitSeg">
+        <button class="who-btn" data-u="d">Días</button>
+        <button class="who-btn" data-u="w">Semanas</button>
+        <button class="who-btn active" data-u="m">Meses</button>
+      </div>
+      <div class="ration-info" id="freqInfo"></div>
+    </div>
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="modal-btn" onclick="closeModal('modalCare')">Cancelar</button>
+      <button class="modal-btn primary" id="btnCareConfirm">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalHEdit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="hEditTitle">Anotar peso</div>
+    <div id="hEditKgWrap">
+      <div class="edit-label">Peso</div>
+      <div class="kg-input-row"><input type="text" inputmode="decimal" autocomplete="off" class="edit-time-input" id="hEditKg" placeholder="Ej: 34,5"><span>kg</span></div>
+    </div>
+    <div class="edit-label">Fecha</div>
+    <input type="date" class="edit-time-input" id="hEditDate">
+    <div class="edit-label">¿Quién?</div>
+    <div class="who-segment edit-who-row" id="hEditWho"></div>
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="modal-btn" onclick="closeModal('modalHEdit')">Cancelar</button>
+      <button class="modal-btn primary" id="btnHEditConfirm">Guardar</button>
+    </div>
+    <button class="modal-link-danger" id="btnHEditDelete">Borrar</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalWalk">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1888,6 +2117,7 @@ let state = {
   records: [],
   walks: [], // paseos: { id, timestamp, dateKey, who } — varios por día
   food: [],  // bolsa: { id, timestamp, type: bag|ration|adjust, grams, who }
+  health: [], // salud: { id, timestamp, type: pipeta|bano|peso|freq-pipeta|freq-bano, value, who }
 
   lastSync: 0,
   firstSyncDone: false, // true cuando hay datos confiables (caché o primer sync)
@@ -1904,7 +2134,8 @@ async function apiGet() {
   return {
     records: data.records || [],
     walks: Array.isArray(data.walks) ? data.walks : null, // null = backend viejo, sin paseos
-    food: Array.isArray(data.food) ? data.food : null     // null = backend sin la hoja Bolsa
+    food: Array.isArray(data.food) ? data.food : null,    // null = backend sin la hoja Bolsa
+    health: Array.isArray(data.health) ? data.health : null // null = backend sin la hoja Salud
   };
 }
 
@@ -1943,7 +2174,11 @@ function loadLocal() {
     const food = localStorage.getItem('keo-food-cache-v1');
     if (food) state.food = JSON.parse(food);
   } catch (e) {}
-  dataSig = JSON.stringify([state.records, state.walks, state.food]);
+  try {
+    const health = localStorage.getItem('keo-health-cache-v1');
+    if (health) state.health = JSON.parse(health);
+  } catch (e) {}
+  dataSig = JSON.stringify([state.records, state.walks, state.food, state.health]);
 }
 
 function saveWho() {
@@ -1956,6 +2191,7 @@ function saveCache() {
     localStorage.setItem(CACHE_KEY, JSON.stringify(state.records));
     localStorage.setItem(WALKS_CACHE_KEY, JSON.stringify(state.walks));
     localStorage.setItem('keo-food-cache-v1', JSON.stringify(state.food));
+    localStorage.setItem('keo-health-cache-v1', JSON.stringify(state.health));
   } catch (e) {}
 }
 
@@ -2019,7 +2255,7 @@ async function doSync(silent) {
   const startVersion = localVersion;
   if (!silent) setSyncStatus('syncing', 'Actualizando…');
   try {
-    const { records, walks, food } = await apiGet();
+    const { records, walks, food, health } = await apiGet();
     if (startVersion !== localVersion || pendingWrites > 0) {
       // Hubo un cambio local mientras viajaba el GET: la foto es vieja, descartarla.
       if (pendingWrites === 0) scheduleSync(300);
@@ -2029,12 +2265,14 @@ async function doSync(silent) {
     state.firstSyncDone = true;
     const nextWalks = walks || state.walks; // backend viejo: conservar los locales
     const nextFood = food || state.food;
-    const sig = JSON.stringify([records, nextWalks, nextFood]);
+    const nextHealth = health || state.health;
+    const sig = JSON.stringify([records, nextWalks, nextFood, nextHealth]);
     if (sig !== dataSig) {
       // Solo re-pintar si algo cambió (evita parpadeos y animaciones repetidas)
       state.records = records;
       state.walks = nextWalks;
       state.food = nextFood;
+      state.health = nextHealth;
       dataSig = sig;
       saveCache();
       renderAll();
@@ -2911,12 +3149,12 @@ function shiftWalkWeek(delta) {
 }
 
 // Escritura optimista genérica para paseos: aplica al instante y revierte si falla la red.
-async function walkWrite(body, apply, revert, okMsg, undoFn) {
+async function walkWrite(body, apply, revert, okMsg, undoFn, face) {
   apply();
   saveCache();
   renderAll();
   // Confirmación al instante (no después del viaje al server)
-  if (okMsg) showToast(okMsg, undoFn ? 'Deshacer' : undefined, undoFn, okMsg === 'Paseo registrado' ? 'paseo' : okMsg === 'Bolsa cargada' ? 'comiendo' : null);
+  if (okMsg) showToast(okMsg, undoFn ? 'Deshacer' : undefined, undoFn, face || okMsg === 'Paseo registrado' ? 'paseo' : okMsg === 'Bolsa cargada' ? 'comiendo' : null);
   try {
     await queueWrite(body);
   } catch (err) {
@@ -3055,6 +3293,7 @@ function renderAll() {
   renderHoyExtras();
   renderKeoAvatar();
   renderWalks();
+  renderSalud();
   if (document.getElementById('tab-mes').style.display !== 'none') renderCalendar();
   refreshScoringIfVisible();
 }
@@ -3221,21 +3460,22 @@ window.addEventListener('online', () => syncFromServer(true));
 const TAB_KEY = 'keo-active-tab';
 
 function switchTab(tab) {
-  ['hoy', 'paseos', 'comida', 'scoring', 'mes'].forEach(t => {
+  ['hoy', 'paseos', 'comida', 'salud', 'scoring', 'mes'].forEach(t => {
     document.getElementById('tab-' + t).style.display = (t === tab) ? 'block' : 'none';
   });
   // Fundido suave al entrar a la pestaña
   const sec = document.getElementById('tab-' + tab);
   staggerIn(sec);
   document.querySelectorAll('.tab-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tab);
+    b.classList.toggle('active', b.dataset.tab === (tab === 'mes' ? 'scoring' : tab)); // Calendario vive dentro de Ranking
   });
-  document.getElementById('pageTitle').textContent = { hoy: 'Hoy', paseos: 'Paseos', comida: 'Comida', scoring: 'Ranking', mes: 'Mes' }[tab];
+  document.getElementById('pageTitle').textContent = { hoy: 'Hoy', paseos: 'Paseos', comida: 'Comida', salud: 'Salud', scoring: 'Ranking', mes: 'Calendario' }[tab];
   try { sessionStorage.setItem(TAB_KEY, tab); } catch (e) {}
   if (tab === 'scoring') loadScoring();
   if (tab === 'mes') renderCalendar();
   if (tab === 'paseos') renderWalks();
   if (tab === 'comida') { foodDaysShown = null; renderFood(); }
+  if (tab === 'salud') renderSalud();
   if (typeof snapKeos === 'function') setTimeout(snapKeos, 450);
 }
 
@@ -3339,7 +3579,7 @@ window.addEventListener('load', () => {
 });
 
 // ==================== NOVEDADES (una sola vez por dispositivo) ====================
-const WHATSNEW_KEY = 'keo-whatsnew-2026-11-bento-bolsa';
+const WHATSNEW_KEY = 'keo-whatsnew-2026-11-salud';
 document.getElementById('btnWhatsNewOk').onclick = () => closeModal('modalWhatsNew');
 try {
   if (!localStorage.getItem(WHATSNEW_KEY)) {
@@ -3522,7 +3762,7 @@ function pxFit(n) {
   return Math.max(1, Math.floor(n * d / 96 + 0.01)) * 96 / d;
 }
 function fitKeoSizes() {
-  [['#keoImg', 192], ['.wk-hero .keo-pic', 150], ['.wn-pic img', 50]].forEach(([sel, n]) => {
+  [['#keoImg', 192], ['.wk-hero .keo-pic', 150], ['.care-hero .keo-pic', 144], ['.wt-hero .keo-pic', 128], ['.wn-pic img', 50]].forEach(([sel, n]) => {
     const px = pxFit(n) + 'px';
     document.querySelectorAll(sel).forEach(i => { i.style.width = px; i.style.height = px; });
   });
@@ -3553,6 +3793,7 @@ function renderHoyExtras() {
   renderWeek7();
   renderLastMeal();
   renderFood();
+  renderCareAlerts();
   renderMe();
 }
 
@@ -3886,13 +4127,493 @@ document.getElementById('foodMiniBag').innerHTML = bagSVG('mini');
 document.getElementById('foodHeroBag').innerHTML = bagSVG('hero');
 
 
+// ==================== SALUD: pipeta, baño y peso ====================
+// Eventos compartidos (hoja "Salud"): pipeta / bano = se hizo ese día; peso = kg;
+// freq-pipeta / freq-bano = cada cuánto ('1m', '3w', '30d'), vale el último.
+// Cada cuidado cuenta desde la última vez que se hizo: tocar «Ya se la di» lo reinicia.
+const WEIGHT_IDEAL = [33, 36];   // kg, rango ideal (por ahora fijo)
+const CARE_ALERT_DAYS = 7;       // el aviso aparece en Hoy desde una semana antes
+const WEIGHT_FREQ = { n: 1, u: 'm' };
+const DAY_MS = 86400000;
+const H_ICO = {
+  pipeta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>',
+  bano: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.68 3 4 3.68 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M10 5 8 7"/><path d="M2 12h20"/><path d="M7 19v2M17 19v2"/></svg>',
+  peso: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><path d="M6.5 8a2 2 0 0 0-1.9 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.93-2.54L19.4 9.5A2 2 0 0 0 17.48 8Z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+};
+const CARE = {
+  pipeta: { name: 'Pipeta', lower: 'pipeta', fem: true, done: 'Ya se la di', ok: 'Pipeta anotada', def: '1m' },
+  bano:   { name: 'Baño', lower: 'baño', fem: false, done: 'Ya lo bañamos', ok: 'Baño anotado', def: '1m' }
+};
+const newHealthId = () => 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const fmtDayTiny = ts => { const d = new Date(ts); return d.getDate() + ' ' + MONTH_ABBR[d.getMonth()]; };
+const fmtKg1 = kg => kg.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const dateInputTs = (v, keepNow) => (!v || v === getDateKey()) && keepNow ? Date.now() : new Date((v || getDateKey()) + 'T12:00:00').getTime();
+const tsToDateInput = ts => getDateKey(new Date(ts));
+
+function healthOf(type) {
+  return state.health.filter(e => e.type === type).sort((a, b) => a.timestamp - b.timestamp);
+}
+function parseFreq(v) {
+  const m = /^(\d+)([dwm])$/.exec(String(v || '').trim());
+  return m ? { n: Math.max(1, Number(m[1])), u: m[2] } : null;
+}
+function careFreq(k) {
+  const f = healthOf('freq-' + k).pop();
+  return parseFreq(f && f.value) || parseFreq(CARE[k].def);
+}
+function freqText(f) {
+  if (f.n === 1) return { d: 'todos los días', w: 'cada semana', m: 'cada mes' }[f.u];
+  return 'cada ' + f.n + ' ' + { d: 'días', w: 'semanas', m: 'meses' }[f.u];
+}
+function addFreq(ts, f) {
+  const d = new Date(ts); d.setHours(12, 0, 0, 0);
+  if (f.u === 'd') d.setDate(d.getDate() + f.n);
+  else if (f.u === 'w') d.setDate(d.getDate() + 7 * f.n);
+  else { // meses de calendario: 31 oct + 1 mes = 30 nov
+    const day = d.getDate();
+    d.setDate(1); d.setMonth(d.getMonth() + f.n);
+    d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+  }
+  return d.getTime();
+}
+function dayDiff(a, b) { // días de calendario de a hasta b
+  const x = new Date(a); x.setHours(12, 0, 0, 0);
+  const y = new Date(b); y.setHours(12, 0, 0, 0);
+  return Math.round((y - x) / DAY_MS);
+}
+function careCalc(k) {
+  const f = careFreq(k), last = healthOf(k).pop() || null;
+  if (!last) return { k, f, last: null, st: 'none', left: Infinity, frac: 0 };
+  const next = addFreq(last.timestamp, f);
+  const left = dayDiff(Date.now(), next);
+  const total = Math.max(1, dayDiff(last.timestamp, next));
+  const st = left < 0 ? 'late' : left === 0 ? 'today' : left <= CARE_ALERT_DAYS ? 'soon' : 'ok';
+  return { k, f, last, next, left, total, st, frac: st === 'late' || st === 'today' ? 1 : Math.min(1, Math.max(0.02, (total - left) / total)) };
+}
+// "en 5 días" / "mañana" / "hoy" / "hace 2 días"
+function leftText(left) {
+  if (left === 0) return 'hoy';
+  if (left === 1) return 'mañana';
+  if (left > 1) return 'en ' + left + ' días';
+  return 'hace ' + (-left) + (left === -1 ? ' día' : ' días');
+}
+function lateWord(k) { return CARE[k].fem ? 'atrasada' : 'atrasado'; }
+function whoHTML(who, size) { return USERS[who] ? userCircleHTML(who, size || 16) : ''; }
+
+function ringHTML(c) {
+  const S = 52, W = 6, r = (S - W) / 2, C = 2 * Math.PI * r;
+  const lbl = c.st === 'none' ? '?' : c.st === 'late' ? '!' : c.st === 'today' ? 'hoy' : c.left > 99 ? Math.round(c.left / 30) + 'm' : c.left + 'd';
+  return '<span class="ring" data-st="' + c.st + '"><svg width="' + S + '" height="' + S + '" viewBox="0 0 ' + S + ' ' + S + '">' +
+    '<circle class="tr" cx="' + S / 2 + '" cy="' + S / 2 + '" r="' + r + '" fill="none" stroke-width="' + W + '"/>' +
+    '<circle class="fg" cx="' + S / 2 + '" cy="' + S / 2 + '" r="' + r + '" fill="none" stroke="currentColor" stroke-width="' + W + '" stroke-linecap="round" stroke-dasharray="' + (C * c.frac).toFixed(1) + ' ' + C.toFixed(1) + '"/>' +
+    '</svg><b>' + lbl + '</b></span>';
+}
+
+// ---------- Escrituras (misma fila serial que el resto)
+function addHealth(ev, okMsg, face) {
+  return walkWrite({ action: 'addHealth', id: ev.id, timestamp: ev.timestamp, type: ev.type, value: ev.value || '', who: ev.who || '' },
+    () => { state.health.push(ev); },
+    () => { ev._failed = true; state.health = state.health.filter(e => e.id !== ev.id); },
+    okMsg, okMsg ? () => removeHealth(ev) : undefined, face);
+}
+function removeHealth(ev, msg) {
+  return walkWrite({ action: 'deleteHealth', id: ev.id },
+    () => { state.health = state.health.filter(e => e.id !== ev.id); },
+    () => { if (!ev._failed && !state.health.some(e => e.id === ev.id)) state.health.push(ev); },
+    msg || 'Deshecho');
+}
+function editHealth(ev, patch) {
+  const old = { timestamp: ev.timestamp, value: ev.value, who: ev.who };
+  const next = Object.assign({}, old, patch);
+  return walkWrite({ action: 'editHealth', id: ev.id, timestamp: next.timestamp, value: next.value || '', who: next.who || '' },
+    () => Object.assign(ev, next), () => Object.assign(ev, old), 'Guardado');
+}
+
+let careQuickLock = false;
+function careDone(k) {
+  if (!state.currentUser) { openCareModal(k, 'log'); return; }
+  if (careQuickLock) return;
+  careQuickLock = true;
+  setTimeout(() => { careQuickLock = false; }, 1500);
+  if (navigator.vibrate) navigator.vibrate(10);
+  addHealth({ id: newHealthId(), timestamp: Date.now(), type: k, value: '', who: state.currentUser }, CARE[k].ok, 'feliz');
+  pulseEl('careHero'); pulseEl('careTile-' + k);
+}
+
+// ---------- Pestaña Salud
+let saludView = 'care';
+try { saludView = sessionStorage.getItem('keo-salud-view') || 'care'; } catch (e) {}
+let wtMonths = '6';
+
+function renderSalud() {
+  renderCare();
+  renderWeight();
+}
+
+function renderCare() {
+  const cs = Object.keys(CARE).map(careCalc);
+  const known = cs.filter(c => c.st !== 'none').sort((a, b) => a.left - b.left);
+  const hero = document.getElementById('careHero');
+  const btn = document.getElementById('careHeroBtn');
+  let face = 'feliz';
+  if (!known.length) {
+    hero.dataset.st = 'none';
+    document.getElementById('careHeroLabel').textContent = 'Cuidados';
+    document.getElementById('careHeroBig').textContent = 'Cargá la última pipeta';
+    document.getElementById('careHeroSub').textContent = 'Así la app avisa cuándo toca';
+    btn.innerHTML = '+ Anotar';
+    btn.dataset.k = 'pipeta'; btn.dataset.act = 'open';
+    face = 'guino';
+  } else {
+    const c = known[0], C = CARE[c.k];
+    hero.dataset.st = c.st;
+    document.getElementById('careHeroLabel').textContent = c.st === 'late' ? '¡Se pasó la fecha!' : c.st === 'ok' ? 'Todo al día · lo próximo' : 'Lo próximo';
+    document.getElementById('careHeroBig').textContent =
+      c.st === 'late' ? C.name + ' ' + lateWord(c.k) : c.st === 'today' ? 'Hoy toca ' + C.lower : C.name + ' ' + leftText(c.left);
+    document.getElementById('careHeroSub').innerHTML =
+      (c.st === 'late' ? 'tocaba el ' + fmtDayShort(c.next) + ' · ' + leftText(c.left) : fmtDayShort(c.next)) +
+      (c.last.who ? ' · la última, ' + c.last.who : '');
+    btn.innerHTML = H_ICO.check + C.done;
+    btn.dataset.k = c.k; btn.dataset.act = 'done';
+    face = c.st === 'ok' ? 'feliz' : 'impaciente';
+  }
+  swapKeoFace(document.getElementById('careHeroKeo'), keoSrc(face));
+
+  cs.forEach(c => {
+    const el = document.getElementById('careTile-' + c.k);
+    el.dataset.st = c.st;
+    el.innerHTML = '<div class="ct-top"><span class="ct-ico" data-k="' + c.k + '">' + H_ICO[c.k] + '</span>' + ringHTML(c) + '</div>' +
+      '<div class="ct-name">' + CARE[c.k].name + '</div>' +
+      '<div class="sub">' + freqText(c.f) + '</div>' +
+      '<div class="ct-last">' + (c.last
+        ? '<span>' + (CARE[c.k].fem ? 'Última' : 'Último') + '</span><span class="ct-who">' + whoHTML(c.last.who) + fmtDayTiny(c.last.timestamp) + '</span>'
+        : '<span>Sin datos</span><span>Cargar ›</span>') + '</div>';
+  });
+
+  const hist = state.health.filter(e => CARE[e.type]).sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
+  document.getElementById('careHistory').innerHTML = hist.length ? hist.map(e =>
+    '<div class="walk-row" data-id="' + e.id + '">' +
+      '<span class="food-ico ct-ico" data-k="' + e.type + '">' + H_ICO[e.type] + '</span>' +
+      '<span class="walk-row-main"><span class="walk-row-name">' + CARE[e.type].name + '</span>' +
+      '<span class="walk-row-sub">' + (e.who || '—') + '</span></span>' +
+      '<span class="h-date">' + fmtDayShort(e.timestamp) + '</span>' + ICON_ROW_EDIT + '</div>').join('')
+    : '<div class="walk-empty"><img class="empty-keo" src="' + keoSrc('guino') + '" alt="" style="width:' + pxFit(72) + 'px;height:' + pxFit(72) + 'px">' +
+      '<b>Todavía no hay nada anotado</b><span>Tocá Pipeta o Baño para cargar la última vez.</span></div>';
+}
+
+function weightCalc() {
+  const ws = healthOf('peso').map(e => Object.assign({}, e, { kg: parseFloat(String(e.value).replace(',', '.')) })).filter(e => e.kg > 0);
+  const last = ws[ws.length - 1] || null;
+  if (!last) return { ws, last: null, left: Infinity };
+  const next = addFreq(last.timestamp, WEIGHT_FREQ);
+  return { ws, last, prev: ws.length > 1 ? ws[ws.length - 2] : null, next, left: dayDiff(Date.now(), next) };
+}
+function weightStatus(kg) { return kg < WEIGHT_IDEAL[0] ? 'low' : kg > WEIGHT_IDEAL[1] ? 'high' : 'ok'; }
+
+function weightChartSVG(ws, months, W) {
+  const H = 176, padL = 28, padR = 16, padT = 22, padB = 26;
+  let pts = months === 'all' ? ws : ws.filter(e => e.timestamp >= Date.now() - Number(months) * 30.44 * DAY_MS);
+  if (!pts.length) pts = ws.slice(-1);
+  const kgs = pts.map(p => p.kg);
+  let lo = Math.min(WEIGHT_IDEAL[0], ...kgs) - 1, hi = Math.max(WEIGHT_IDEAL[1], ...kgs) + 1;
+  const step = hi - lo <= 9 ? 2 : hi - lo <= 18 ? 3 : 5;
+  lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+  const one = pts.length === 1;
+  const t0 = one ? pts[0].timestamp - 15 * DAY_MS : pts[0].timestamp;
+  const t1 = one ? pts[0].timestamp + 15 * DAY_MS : pts[pts.length - 1].timestamp;
+  const x = t => padL + (W - padL - padR) * ((t - t0) / Math.max(1, t1 - t0));
+  const y = v => padT + (H - padT - padB) * (1 - (v - lo) / (hi - lo));
+  let g = '';
+  for (let v = lo; v <= hi; v += step) {
+    g += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(v) + '" y2="' + y(v) + '" class="wc-grid"/>' +
+      '<text x="0" y="' + (y(v) + 4) + '" class="wc-axis">' + v + '</text>';
+  }
+  const by = y(WEIGHT_IDEAL[1]), bh = y(WEIGHT_IDEAL[0]) - by;
+  g += '<rect x="' + padL + '" y="' + by + '" width="' + (W - padL - padR) + '" height="' + bh + '" rx="8" class="wc-band"/>' +
+    '<text x="' + (padL + 8) + '" y="' + (y(WEIGHT_IDEAL[0]) - 7) + '" class="wc-band-t">ideal ' + WEIGHT_IDEAL[0] + '–' + WEIGHT_IDEAL[1] + ' kg</text>';
+  if (!one) g += '<polyline points="' + pts.map(p => x(p.timestamp).toFixed(1) + ',' + y(p.kg).toFixed(1)).join(' ') + '" class="wc-line"/>';
+  pts.forEach((p, i) => {
+    const last = i === pts.length - 1;
+    g += '<circle cx="' + x(p.timestamp).toFixed(1) + '" cy="' + y(p.kg).toFixed(1) + '" r="' + (last ? 5 : 3.2) + '" class="wc-dot' + (last ? ' last' : '') + '"/>';
+  });
+  const lab = (p, anchor) => '<text x="' + Math.min(W - 4, Math.max(padL, x(p.timestamp))) + '" y="' + (y(p.kg) - 11) + '" text-anchor="' + anchor + '" class="wc-val">' + fmtKg1(p.kg) + '</text>';
+  const lastP = pts[pts.length - 1];
+  g += lab(lastP, one ? 'middle' : 'end');
+  if (!one) g += lab(pts[0], 'start');
+  const dlab = (p, anchor) => '<text x="' + x(p.timestamp) + '" y="' + (H - 6) + '" text-anchor="' + anchor + '" class="wc-date">' + fmtDayTiny(p.timestamp) + '</text>';
+  g += one ? dlab(lastP, 'middle') : dlab(pts[0], 'start') + dlab(lastP, 'end');
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '">' + g + '</svg>';
+}
+
+function renderWeight() {
+  const w = weightCalc();
+  const hero = document.getElementById('wtHero');
+  const pill = document.getElementById('wtPill');
+  if (!w.last) {
+    hero.dataset.st = 'none';
+    document.getElementById('wtNum').innerHTML = '—';
+    document.getElementById('wtSub').textContent = 'Todavía no lo pesaron';
+    pill.hidden = true;
+    document.getElementById('wtChart').innerHTML = '<div class="chart-empty">Cuando anoten el primer peso vas a ver cómo viene</div>';
+    document.getElementById('wtDelta').textContent = '—';
+    document.getElementById('wtDeltaSub').textContent = 'falta el primer pesaje';
+    document.getElementById('wtNext').textContent = 'cuando quieran';
+    document.getElementById('wtNextTile').dataset.st = '';
+    document.getElementById('wtHistory').innerHTML = '';
+    return;
+  }
+  const st = weightStatus(w.last.kg);
+  hero.dataset.st = st;
+  document.getElementById('wtNum').innerHTML = fmtKg1(w.last.kg) + '<small>kg</small>';
+  document.getElementById('wtSub').innerHTML = fmtDayShort(w.last.timestamp) + (w.last.who ? ' · ' + whoHTML(w.last.who) + ' ' + w.last.who : '');
+  pill.hidden = false;
+  pill.textContent = st === 'ok' ? 'En su rango ideal' : (st === 'high' ? 'Por encima' : 'Por debajo') + ' del ideal (' + WEIGHT_IDEAL[0] + '–' + WEIGHT_IDEAL[1] + ' kg)';
+
+  const wrap = document.getElementById('wtChart');
+  const Wd = Math.round(wrap.clientWidth) || 330;
+  wrap.innerHTML = weightChartSVG(w.ws, wtMonths, Wd) + (w.ws.length === 1 ? '<div class="wc-note">Con el próximo pesaje aparece la curva</div>' : '');
+
+  if (w.prev) {
+    const d = Math.round((w.last.kg - w.prev.kg) * 10) / 10;
+    document.getElementById('wtDelta').textContent = (d > 0 ? '+' : d < 0 ? '−' : '') + fmtKg1(Math.abs(d)) + ' kg';
+    document.getElementById('wtDeltaSub').textContent = 'desde el ' + fmtDayTiny(w.prev.timestamp);
+  } else {
+    document.getElementById('wtDelta').textContent = '—';
+    document.getElementById('wtDeltaSub').textContent = 'es el primer pesaje';
+  }
+  const nt = document.getElementById('wtNextTile');
+  nt.dataset.st = w.left < 0 ? 'late' : w.left === 0 ? 'today' : '';
+  document.getElementById('wtNext').textContent = w.left < 0 ? 'atrasado' : leftText(w.left);
+  document.getElementById('wtNextSub').textContent = w.left < 0 ? 'tocaba el ' + fmtDayTiny(w.next) : 'una vez por mes';
+
+  document.getElementById('wtHistory').innerHTML = w.ws.slice().reverse().slice(0, 12).map((e, i, arr) => {
+    const prev = arr[i + 1];
+    const d = prev ? Math.round((e.kg - prev.kg) * 10) / 10 : null;
+    return '<div class="walk-row" data-id="' + e.id + '">' +
+      '<span class="food-ico ct-ico" data-k="peso">' + H_ICO.peso + '</span>' +
+      '<span class="walk-row-main"><span class="walk-row-name">' + fmtKg1(e.kg) + ' kg' +
+        (d !== null && d !== 0 ? ' <span class="wt-d">' + (d > 0 ? '+' : '−') + fmtKg1(Math.abs(d)) + '</span>' : '') + '</span>' +
+      '<span class="walk-row-sub">' + fmtDayShort(e.timestamp) + (e.who ? ' · ' + e.who : '') + '</span></span>' + ICON_ROW_EDIT + '</div>';
+  }).join('');
+}
+
+function setSaludView(v, anim) {
+  saludView = v;
+  try { sessionStorage.setItem('keo-salud-view', v); } catch (e) {}
+  document.querySelectorAll('#saludView .who-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+  const care = document.getElementById('saludCare'), wt = document.getElementById('saludWeight');
+  care.hidden = v !== 'care'; wt.hidden = v !== 'weight';
+  const on = v === 'care' ? care : wt;
+  if (anim && !reduceMotion()) { on.classList.remove('reveal'); void on.offsetWidth; on.classList.add('reveal'); }
+  if (v === 'weight') renderWeight(); // el gráfico mide el ancho real
+  setTimeout(snapKeos, 60);
+}
+
+// ---------- Avisos en Hoy (desde una semana antes)
+function renderCareAlerts() {
+  const box = document.getElementById('careAlerts');
+  const items = Object.keys(CARE).map(careCalc).filter(c => c.st !== 'none' && c.left <= CARE_ALERT_DAYS);
+  const w = weightCalc();
+  if (w.last && w.left <= 0) items.push({ k: 'peso', left: w.left, next: w.next, st: w.left < 0 ? 'late' : 'today' });
+  items.sort((a, b) => a.left - b.left);
+  box.hidden = !items.length;
+  box.innerHTML = items.map(c => {
+    const isW = c.k === 'peso';
+    const lw = isW ? 'atrasado' : lateWord(c.k);
+    const label = c.st === 'late' ? lw[0].toUpperCase() + lw.slice(1) + ' ' + (-c.left) + (c.left === -1 ? ' día' : ' días')
+      : c.st === 'today' ? 'Hoy toca' : leftText(c.left)[0].toUpperCase() + leftText(c.left).slice(1);
+    return '<div class="tile span care-alert" data-st="' + c.st + '" data-k="' + c.k + '" role="button">' +
+      '<span class="ct-ico" data-k="' + c.k + '">' + H_ICO[c.k] + '</span>' +
+      '<div class="ca-txt"><div class="th"><span>' + label + '</span></div>' +
+      '<div class="ca-name">' + (isW ? 'Pesar a Keo' : CARE[c.k].name) + '</div>' +
+      '<div class="sub">' + (isW ? 'una vez por mes' : fmtDayShort(c.next) + ' · ' + freqText(c.f)) + '</div></div>' +
+      '<button class="ca-btn" data-k="' + c.k + '">' + (isW ? 'Anotar' : CARE[c.k].done) + '</button></div>';
+  }).join('');
+}
+document.getElementById('careAlerts').addEventListener('click', e => {
+  const b = e.target.closest('.ca-btn');
+  if (b) { e.stopPropagation(); if (b.dataset.k === 'peso') openWeightModal(null); else careDone(b.dataset.k); return; }
+  const t = e.target.closest('.care-alert');
+  if (!t) return;
+  setSaludView(t.dataset.k === 'peso' ? 'weight' : 'care');
+  goTab('salud');
+});
+
+// ---------- Modal: anotar cuidado / cada cuánto
+let careModal = { k: 'pipeta', mode: 'log', who: null, kindPick: false };
+function renderWhoSeg(id, sel, onPick) {
+  const c = document.getElementById(id);
+  c.innerHTML = '';
+  NAMES.forEach(name => {
+    const b = document.createElement('button');
+    b.className = 'who-btn' + (name === sel ? ' active' : '');
+    b.textContent = name;
+    b.onclick = () => onPick(name);
+    c.appendChild(b);
+  });
+}
+function careFreqInfo() {
+  const n = Math.max(1, Math.min(99, Math.round(Number(document.getElementById('freqInput').value) || 1)));
+  const u = document.querySelector('#freqUnitSeg .who-btn.active').dataset.u;
+  const last = healthOf(careModal.k).pop();
+  document.getElementById('freqInfo').textContent = freqText({ n, u })[0].toUpperCase() + freqText({ n, u }).slice(1) +
+    (last ? ' · la próxima sería el ' + fmtDayShort(addFreq(last.timestamp, { n, u })) : '');
+}
+function renderCareModal() {
+  const m = careModal;
+  document.getElementById('careModalTitle').textContent = m.kindPick ? 'Anotar cuidado' : CARE[m.k].name;
+  document.getElementById('careKindSeg').hidden = !m.kindPick;
+  document.querySelectorAll('#careKindSeg .who-btn').forEach(b => b.classList.toggle('active', b.dataset.k === m.k));
+  document.getElementById('careModeSeg').hidden = m.kindPick;
+  document.querySelectorAll('#careModeSeg .who-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m.mode));
+  document.getElementById('carePaneLog').hidden = m.mode !== 'log';
+  document.getElementById('carePaneFreq').hidden = m.mode !== 'freq';
+  document.getElementById('careLogText').textContent = (m.k === 'pipeta' ? '¿Cuándo se la dieron?' : '¿Cuándo lo bañaron?') + ' Desde ese día se vuelve a contar.';
+  renderWhoSeg('careWhoButtons', m.who, n => { careModal.who = n; renderCareModal(); });
+  if (m.mode === 'freq') careFreqInfo();
+}
+function openCareModal(k, mode, kindPick) {
+  careModal = { k, mode: mode || 'log', who: state.currentUser, kindPick: !!kindPick };
+  const f = careFreq(k);
+  document.getElementById('freqInput').value = f.n;
+  document.querySelectorAll('#freqUnitSeg .who-btn').forEach(b => b.classList.toggle('active', b.dataset.u === f.u));
+  document.getElementById('careDateInput').value = getDateKey();
+  document.getElementById('careDateInput').max = getDateKey();
+  renderCareModal();
+  openModal('modalCare');
+}
+document.getElementById('careKindSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-k]'); if (!b) return;
+  careModal.k = b.dataset.k; renderCareModal();
+});
+document.getElementById('careModeSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-mode]'); if (!b) return;
+  careModal.mode = b.dataset.mode; renderCareModal();
+});
+document.getElementById('freqUnitSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-u]'); if (!b) return;
+  document.querySelectorAll('#freqUnitSeg .who-btn').forEach(x => x.classList.toggle('active', x === b));
+  careFreqInfo();
+});
+document.getElementById('freqInput').addEventListener('input', careFreqInfo);
+document.getElementById('freqMinus').addEventListener('click', () => {
+  const i = document.getElementById('freqInput'), v = Number(i.value) || 1;
+  if (v <= 1) { rubberBand(i.closest('.sv'), -1); return; }
+  i.value = v - 1; careFreqInfo();
+});
+document.getElementById('freqPlus').addEventListener('click', () => {
+  const i = document.getElementById('freqInput'), v = Number(i.value) || 1;
+  if (v >= 99) { rubberBand(i.closest('.sv'), 1); return; }
+  i.value = v + 1; careFreqInfo();
+});
+document.getElementById('btnCareConfirm').addEventListener('click', () => {
+  const m = careModal, C = CARE[m.k];
+  if (m.mode === 'freq') {
+    const n = Math.round(Number(document.getElementById('freqInput').value));
+    if (!n || n < 1 || n > 99) { showToast('Poné cada cuánto'); return; }
+    const u = document.querySelector('#freqUnitSeg .who-btn.active').dataset.u;
+    closeModal('modalCare');
+    const cur = careFreq(m.k);
+    if (cur.n === n && cur.u === u) return;
+    addHealth({ id: newHealthId(), timestamp: Date.now(), type: 'freq-' + m.k, value: n + u, who: state.currentUser || '' },
+      C.name + ': ' + freqText({ n, u }));
+    return;
+  }
+  if (!m.who) { showToast('Elegí quién fue'); return; }
+  const day = document.getElementById('careDateInput').value || getDateKey();
+  if (day > getDateKey()) { showToast('No puede ser una fecha futura'); return; }
+  closeModal('modalCare');
+  addHealth({ id: newHealthId(), timestamp: dateInputTs(day, true), type: m.k, value: '', who: m.who }, C.ok, 'feliz');
+});
+
+// ---------- Modal: anotar peso / editar cualquier registro
+let hEdit = null; // { ev | null, type, who }
+function openHEdit(ev) {
+  const type = ev ? ev.type : 'peso';
+  hEdit = { ev, type, who: ev ? ev.who : state.currentUser };
+  const isW = type === 'peso';
+  document.getElementById('hEditTitle').textContent = ev ? 'Editar ' + (isW ? 'peso' : CARE[type].lower) : 'Anotar peso';
+  document.getElementById('hEditKgWrap').hidden = !isW;
+  const lastW = weightCalc().last;
+  document.getElementById('hEditKg').value = ev && isW ? String(ev.value).replace('.', ',') : (lastW ? fmtKg1(lastW.kg) : '');
+  document.getElementById('hEditDate').value = tsToDateInput(ev ? ev.timestamp : Date.now());
+  document.getElementById('hEditDate').max = getDateKey();
+  document.getElementById('btnHEditDelete').style.display = ev ? '' : 'none';
+  const pick = n => { hEdit.who = n; renderWhoSeg('hEditWho', n, pick); };
+  renderWhoSeg('hEditWho', hEdit.who, pick);
+  openModal('modalHEdit');
+}
+function openWeightModal() { openHEdit(null); }
+document.getElementById('btnHEditConfirm').addEventListener('click', () => {
+  if (!hEdit) return;
+  const isW = hEdit.type === 'peso';
+  let value = '';
+  if (isW) {
+    const kg = parseFloat(String(document.getElementById('hEditKg').value).replace(',', '.'));
+    if (!kg || kg < 1 || kg > 99) { showToast('Poné el peso en kg'); return; }
+    value = String(Math.round(kg * 10) / 10);
+  }
+  const day = document.getElementById('hEditDate').value || getDateKey();
+  if (day > getDateKey()) { showToast('No puede ser una fecha futura'); return; }
+  if (!hEdit.ev && !hEdit.who) { showToast('Elegí quién lo pesó'); return; }
+  closeModal('modalHEdit');
+  if (hEdit.ev) {
+    const sameDay = tsToDateInput(hEdit.ev.timestamp) === day;
+    editHealth(hEdit.ev, { timestamp: sameDay ? hEdit.ev.timestamp : dateInputTs(day, false), value, who: hEdit.who || '' });
+  } else {
+    addHealth({ id: newHealthId(), timestamp: dateInputTs(day, true), type: 'peso', value, who: hEdit.who }, 'Peso anotado: ' + fmtKg1(Number(value)) + ' kg', 'feliz');
+    pulseEl('wtHero');
+  }
+});
+document.getElementById('btnHEditDelete').addEventListener('click', () => {
+  if (!hEdit || !hEdit.ev) return;
+  const ev = hEdit.ev;
+  closeModal('modalHEdit');
+  removeHealth(ev, 'Borrado');
+});
+
+// ---------- Eventos de la pestaña
+document.getElementById('saludView').addEventListener('click', e => {
+  const b = e.target.closest('[data-v]');
+  if (b && b.dataset.v !== saludView) setSaludView(b.dataset.v, true);
+});
+document.getElementById('careHeroBtn').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (b.dataset.act === 'done') careDone(b.dataset.k); else openCareModal(b.dataset.k, 'log');
+});
+['pipeta', 'bano'].forEach(k => document.getElementById('careTile-' + k).addEventListener('click', () => openCareModal(k, 'log')));
+document.getElementById('btnCareAdd').addEventListener('click', () => openCareModal(careCalc('pipeta').left <= careCalc('bano').left ? 'pipeta' : 'bano', 'log', true));
+document.getElementById('careHistory').addEventListener('click', e => {
+  const r = e.target.closest('.walk-row'); if (!r) return;
+  const ev = state.health.find(x => x.id === r.dataset.id); if (ev) openHEdit(ev);
+});
+document.getElementById('wtHistory').addEventListener('click', e => {
+  const r = e.target.closest('.walk-row'); if (!r) return;
+  const ev = state.health.find(x => x.id === r.dataset.id); if (ev) openHEdit(ev);
+});
+document.getElementById('btnWeightAdd').addEventListener('click', () => openHEdit(null));
+document.getElementById('wtRange').addEventListener('click', e => {
+  const b = e.target.closest('[data-m]'); if (!b) return;
+  wtMonths = b.dataset.m;
+  document.querySelectorAll('#wtRange .chip').forEach(x => x.classList.toggle('active', x === b));
+  renderWeight();
+});
+// Ranking ⇄ Calendario
+document.querySelectorAll('.rank-view').forEach(seg => seg.addEventListener('click', e => {
+  const b = e.target.closest('[data-view]');
+  if (b) goTab(b.dataset.view);
+}));
+setSaludView(saludView);
+
+
 // ==================== MOVIMIENTO ====================
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Entrada escalonada (30 ms entre bloques) al mostrar una pestaña
 function staggerIn(sec) {
   sec.querySelectorAll('.who-segment').forEach(seg => requestAnimationFrame(() => syncKnob(seg)));
-  const els = sec.querySelectorAll(':scope > .bento > *, :scope > .bento, :scope > .big-cta, :scope > .link-btn, :scope > .walk-day-head, :scope > .walk-list, :scope > .week-card, :scope > .rank-metric, :scope > .period-chips, :scope > .cal-header, :scope > .cal-tile, :scope > #scoringContent > *, :scope > .food-note');
+  const els = sec.querySelectorAll(':scope > .bento > *, :scope > .bento, :scope > .big-cta, :scope > .link-btn, :scope > .walk-day-head, :scope > .walk-list, :scope > .week-card, :scope > .rank-metric, :scope > .period-chips, :scope > .cal-header, :scope > .cal-tile, :scope > #scoringContent > *, :scope > .food-note, :scope > .rank-view, :scope > .salud-view, :scope > .salud-pane > .bento > *, :scope > .salud-pane > .big-cta, :scope > .salud-pane > .walk-day-head, :scope > .salud-pane > .walk-list');
   let i = 0;
   els.forEach(el => {
     if (el.classList.contains('bento')) return; // sus hijos se animan solos
@@ -3907,7 +4628,7 @@ function staggerIn(sec) {
 
 // Cambio de pestaña con View Transitions (crossfade + bolsa compartida) donde el navegador lo soporta
 function goTab(tab) {
-  const cur = ['hoy', 'paseos', 'comida', 'scoring', 'mes'].find(t => document.getElementById('tab-' + t).style.display !== 'none');
+  const cur = ['hoy', 'paseos', 'comida', 'salud', 'scoring', 'mes'].find(t => document.getElementById('tab-' + t).style.display !== 'none');
   if (cur === tab) return;
   if (document.startViewTransition && !reduceMotion()) document.startViewTransition(() => switchTab(tab));
   else switchTab(tab);
