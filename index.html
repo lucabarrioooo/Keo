@@ -1599,6 +1599,10 @@
   .ca-pic[data-k="bano"] { background: var(--ic-bano-bg); }
   .ca-pic[data-k="peso"] { background: var(--t-todo); }
   .care-alert[data-st="today"] .ca-pic, .care-alert[data-st="late"] .ca-pic { background: var(--surface); }
+  .ca-pic[data-k="cumple"] { background: var(--t-todo); }
+  .care-alert[data-k="cumple"][data-st="soon"] .th span { color: #6A55C9; }
+  .care-alert[data-k="cumple"][data-st="today"] { background: var(--t-todo); }
+  @media (prefers-color-scheme: dark) { .care-alert[data-k="cumple"][data-st="soon"] .th span { color: #B9A8FF; } }
   .care-alert[data-st="today"] .ct-ico, .care-alert[data-st="late"] .ct-ico { background: var(--surface); }
   .ca-txt { flex: 1; min-width: 0; }
   .ca-name { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-top: 3px; }
@@ -4325,14 +4329,17 @@ function careFace(c) {
 }
 
 // Ficha chiquita de Keo al fondo de Cuidados: edad y cuánto falta para el cumple
-function renderKeoId() {
-  const el = document.getElementById('keoId');
-  if (!el) return;
+function keoNextBirthday() {
   const now = new Date(); now.setHours(12, 0, 0, 0);
   let next = new Date(now.getFullYear(), KEO_BIRTH[1], KEO_BIRTH[2], 12);
   if (next < now) next = new Date(now.getFullYear() + 1, KEO_BIRTH[1], KEO_BIRTH[2], 12);
   const left = dayDiff(now, next);
-  const age = next.getFullYear() - KEO_BIRTH[0] - (left === 0 ? 0 : 1);
+  return { next: next.getTime(), left, turns: next.getFullYear() - KEO_BIRTH[0], age: next.getFullYear() - KEO_BIRTH[0] - (left === 0 ? 0 : 1) };
+}
+function renderKeoId() {
+  const el = document.getElementById('keoId');
+  if (!el) return;
+  const { left, age } = keoNextBirthday();
   const when = left === 0 ? '¡es hoy!' : left === 1 ? 'mañana' : left <= 60 ? 'en ' + left + ' días' : 'en ' + Math.round(left / 30.44) + ' meses';
   el.innerHTML = '<img src="' + keoSrc(left === 0 ? 'fiesta' : 'feliz') + '" alt="" style="width:' + pxFit(48) + 'px;height:' + pxFit(48) + 'px">' +
     '<span class="ki-main"><b>Keo</b><span>Golden retriever · ' + age + (age === 1 ? ' año' : ' años') + '</span></span>' +
@@ -4517,9 +4524,18 @@ function renderCareAlerts() {
   const items = Object.keys(CARE).map(careCalc).filter(c => c.st !== 'none' && c.left <= CARE_ALERT_DAYS);
   const w = weightCalc();
   if (w.last && w.left <= 0) items.push({ k: 'peso', left: w.left, next: w.next, st: w.left < 0 ? 'late' : 'today' });
+  const bd = keoNextBirthday();
+  if (bd.left <= 7) items.push({ k: 'cumple', left: bd.left, next: bd.next, turns: bd.turns, st: bd.left === 0 ? 'today' : 'soon' });
   items.sort((a, b) => a.left - b.left);
   box.hidden = !items.length;
   box.innerHTML = items.map(c => {
+    if (c.k === 'cumple') {
+      return '<div class="tile span care-alert" data-st="' + c.st + '" data-k="cumple" role="button">' +
+        '<span class="ca-pic" data-k="cumple"><img src="' + keoSrc('fiesta') + '" alt="" style="width:' + pxFit(64) + 'px;height:' + pxFit(64) + 'px"></span>' +
+        '<div class="ca-txt"><div class="th"><span>' + (c.left === 0 ? '¡Es hoy!' : c.left === 1 ? 'Mañana' : 'En ' + c.left + ' días') + '</span></div>' +
+        '<div class="ca-name">Cumple de Keo</div>' +
+        '<div class="sub">cumple ' + c.turns + ' años · ' + fmtDayShort(c.next) + '</div></div></div>';
+    }
     const isW = c.k === 'peso';
     const lw = isW ? 'atrasado' : lateWord(c.k);
     const label = c.st === 'late' ? lw[0].toUpperCase() + lw.slice(1) + ' ' + (-c.left) + (c.left === -1 ? ' día' : ' días')
@@ -4538,6 +4554,7 @@ document.getElementById('careAlerts').addEventListener('click', e => {
   const t = e.target.closest('.care-alert');
   if (!t) return;
   setSaludView(t.dataset.k === 'peso' ? 'weight' : 'care');
+  if (t.dataset.k === 'cumple') { goTab('salud'); setTimeout(() => document.getElementById('keoId').scrollIntoView({ behavior: 'smooth', block: 'center' }), 350); return; }
   goTab('salud');
 });
 
