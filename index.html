@@ -1645,6 +1645,14 @@
   #wtNextTile[data-st="late"] .big, #wtNextTile[data-st="today"] .big { color: var(--orange); }
   .wt-d { font-size: 12.5px; font-weight: 700; color: var(--text-secondary); margin-left: 4px; }
 
+  /* Ficha de Keo (al fondo de Cuidados, discreta) */
+  .keo-id { display: flex; align-items: center; gap: 10px; margin: 22px 4px 4px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--text-secondary); }
+  .keo-id img { image-rendering: pixelated; flex-shrink: 0; border-radius: 12px; background: var(--surface-2); }
+  .ki-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; font-weight: 600; }
+  .ki-main b { font-size: 14px; font-weight: 800; color: var(--text); }
+  .ki-bday { font-size: 12px; font-weight: 600; text-align: right; line-height: 1.35; }
+  .ki-bday span { color: var(--text-tertiary); }
+
   /* Modal de cuidados */
   .care-mode { margin-bottom: 4px; }
   #careKindSeg { margin-bottom: 4px; }
@@ -1839,6 +1847,7 @@
     </div>
     <div class="walk-day-head"><div class="section-title">Historial</div><button class="walk-add-link" id="btnCareAdd">+ Agregar</button></div>
     <div class="walk-list" id="careHistory"></div>
+    <div class="keo-id" id="keoId"></div>
   </div>
 
   <div class="salud-pane" id="saludWeight" hidden>
@@ -4315,7 +4324,23 @@ function careFace(c) {
   return 'pipeta';
 }
 
+// Ficha chiquita de Keo al fondo de Cuidados: edad y cuánto falta para el cumple
+function renderKeoId() {
+  const el = document.getElementById('keoId');
+  if (!el) return;
+  const now = new Date(); now.setHours(12, 0, 0, 0);
+  let next = new Date(now.getFullYear(), KEO_BIRTH[1], KEO_BIRTH[2], 12);
+  if (next < now) next = new Date(now.getFullYear() + 1, KEO_BIRTH[1], KEO_BIRTH[2], 12);
+  const left = dayDiff(now, next);
+  const age = next.getFullYear() - KEO_BIRTH[0] - (left === 0 ? 0 : 1);
+  const when = left === 0 ? '¡es hoy!' : left === 1 ? 'mañana' : left <= 60 ? 'en ' + left + ' días' : 'en ' + Math.round(left / 30.44) + ' meses';
+  el.innerHTML = '<img src="' + keoSrc(left === 0 ? 'fiesta' : 'feliz') + '" alt="" style="width:' + pxFit(48) + 'px;height:' + pxFit(48) + 'px">' +
+    '<span class="ki-main"><b>Keo</b><span>Golden retriever · ' + age + (age === 1 ? ' año' : ' años') + '</span></span>' +
+    '<span class="ki-bday">Cumple el ' + KEO_BIRTH[2] + ' ' + MONTH_ABBR[KEO_BIRTH[1]] + '<br><span>' + when + '</span></span>';
+}
+
 function renderCare() {
+  renderKeoId();
   const cs = Object.keys(CARE).map(careCalc);
   const known = cs.filter(c => c.st !== 'none').sort((a, b) => a.left - b.left);
   const hero = document.getElementById('careHero');
@@ -4717,7 +4742,7 @@ const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)')
 // Entrada escalonada (30 ms entre bloques) al mostrar una pestaña
 function staggerIn(sec) {
   sec.querySelectorAll('.who-segment').forEach(seg => requestAnimationFrame(() => syncKnob(seg)));
-  const els = sec.querySelectorAll(':scope > .bento > *, :scope > .bento, :scope > .big-cta, :scope > .link-btn, :scope > .walk-day-head, :scope > .walk-list, :scope > .week-card, :scope > .rank-metric, :scope > .period-chips, :scope > .cal-header, :scope > .cal-tile, :scope > #scoringContent > *, :scope > .food-note, :scope > .rank-view, :scope > .salud-view, :scope > .salud-pane > .bento > *, :scope > .salud-pane > .big-cta, :scope > .salud-pane > .walk-day-head, :scope > .salud-pane > .walk-list');
+  const els = sec.querySelectorAll(':scope > .bento > *, :scope > .bento, :scope > .big-cta, :scope > .link-btn, :scope > .walk-day-head, :scope > .walk-list, :scope > .week-card, :scope > .rank-metric, :scope > .period-chips, :scope > .cal-header, :scope > .cal-tile, :scope > #scoringContent > *, :scope > .food-note, :scope > .rank-view, :scope > .salud-view, :scope > .salud-pane > .bento > *, :scope > .salud-pane > .big-cta, :scope > .salud-pane > .walk-day-head, :scope > .salud-pane > .walk-list, :scope > .salud-pane > .keo-id');
   let i = 0;
   els.forEach(el => {
     if (el.classList.contains('bento')) return; // sus hijos se animan solos
