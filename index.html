@@ -1621,6 +1621,11 @@
   .wt-hero .sub .user-circle { vertical-align: -3px; }
   .wt-pill { display: inline-flex; margin-top: 10px; padding: 5px 11px; border-radius: 99px; background: var(--surface); font-size: 12.5px; font-weight: 800; color: var(--green); max-width: 62%; }
   .wt-hero[data-st="low"] .wt-pill, .wt-hero[data-st="high"] .wt-pill { color: var(--orange); }
+  button.wt-pill { border: 0; font-family: inherit; cursor: pointer; text-align: left; align-items: center; gap: 4px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; min-height: 30px; }
+  button.wt-pill:active { transform: scale(.97); }
+  .wt-pill b { opacity: .6; }
+  .wc-meta { stroke: var(--orange); stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .wc-meta-t { font-size: 10.5px; font-weight: 800; fill: var(--orange); }
   .wt-hero .keo-pic { width: 128px; height: 128px; right: -4px; bottom: -6px; top: auto; }
   .wt-range { margin: 10px 0 4px; flex-wrap: wrap; gap: 6px; }
   .wt-range .chip { min-height: 34px; padding: 0 12px; font-size: 13px; }
@@ -1842,7 +1847,7 @@
         <div class="th"><span>Peso actual</span></div>
         <div class="wt-num" id="wtNum">—</div>
         <div class="sub" id="wtSub"></div>
-        <div class="wt-pill" id="wtPill" hidden></div>
+        <button class="wt-pill" id="wtPill" type="button" hidden aria-label="Cambiar la meta de peso"></button>
         <img class="keo-pic" data-keo="balanza" alt="">
       </div>
       <div class="tile span white wt-chart">
@@ -2066,6 +2071,21 @@
       <button class="modal-btn" onclick="closeModal('modalCare')">Cancelar</button>
       <button class="modal-btn primary" id="btnCareConfirm">Guardar</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalMeta">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Meta de peso</div>
+    <div class="modal-text">La app muestra cuánto falta. Cuando la cumplan, pongan la próxima.</div>
+    <div class="kg-input-row"><input type="text" inputmode="decimal" autocomplete="off" class="edit-time-input" id="metaKg" placeholder="Ej: 38"><span>kg</span></div>
+    <div class="ration-info" id="metaInfo"></div>
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="modal-btn" onclick="closeModal('modalMeta')">Cancelar</button>
+      <button class="modal-btn primary" id="btnMetaConfirm">Guardar</button>
+    </div>
+    <button class="modal-link-danger" id="btnMetaClear">Sacar la meta</button>
   </div>
 </div>
 
@@ -3623,6 +3643,10 @@ function mealState(meal) {
 
 // Qué cara pone Keo según la hora y las comidas
 let keoOverride = null, keoOverrideT = null, keoTapN = 0, keoLastKey = '';
+const KEO_BIRTH = [2021, 5, 27]; // nació el 27 de junio de 2021 (mes 0-based)
+function keoBirthdayAge(d = new Date()) {
+  return d.getMonth() === KEO_BIRTH[1] && d.getDate() === KEO_BIRTH[2] ? d.getFullYear() - KEO_BIRTH[0] : 0;
+}
 const STREAK_PARTY = [7, 14, 30, 50, 100, 150, 200, 300, 365, 500, 730, 1000];
 function streakCount() {
   const map = buildDayMap(state.records);
@@ -3639,6 +3663,8 @@ function keoMood() {
   const both = !!getMealRecord('manana') && !!getMealRecord('noche');
   if (both && (h >= 22 || h < 6)) return { k: 'durmiendo', meal };
   const st = mealState(meal);
+  const age = keoBirthdayAge();
+  if (age && st !== 'late') return { k: 'fiesta', meal, cumple: age };
   if (st === 'done') {
     const n = both ? streakCount() : 0;
     if (STREAK_PARTY.includes(n)) return { k: 'fiesta', meal, n };
@@ -3656,7 +3682,7 @@ function keoText(m) {
     case 'durmiendo': return ['Zzz… mañana más', 'Durmiendo'];
     case 'enamorado': return ['Te quiero mucho' + (m.who ? ', ' + m.who : ''), 'Mimos'];
     case 'guino': return ['¿Y un premio?', 'Mimos'];
-    case 'fiesta': return ['¡' + m.n + ' días seguidos sin olvidos!', '¡Racha de ' + m.n + ' días!'];
+    case 'fiesta': return m.cumple ? ['¡Hoy cumplo ' + m.cumple + ' años!', '¡Feliz cumple, Keo!'] : ['¡' + m.n + ' días seguidos sin olvidos!', '¡Racha de ' + m.n + ' días!'];
     default: return am ? ['¡Buen día! ¿Y el desayuno?', 'Esperando el desayuno'] : ['¿Me dan la cena? Tengo hambreeee', 'Esperando la cena'];
   }
 }
@@ -4347,6 +4373,11 @@ function weightCalc() {
   const next = addFreq(last.timestamp, WEIGHT_FREQ);
   return { ws, last, prev: ws.length > 1 ? ws[ws.length - 2] : null, next, left: dayDiff(Date.now(), next) };
 }
+function weightMeta() {
+  const e = healthOf('meta-peso').pop();
+  const v = e ? parseFloat(String(e.value).replace(',', '.')) : NaN;
+  return v > 0 ? v : null;
+}
 function weightStatus(kg) { return kg < WEIGHT_IDEAL[0] ? 'low' : kg > WEIGHT_IDEAL[1] ? 'high' : 'ok'; }
 
 function weightChartSVG(ws, months, W) {
@@ -4354,7 +4385,8 @@ function weightChartSVG(ws, months, W) {
   let pts = months === 'all' ? ws : ws.filter(e => e.timestamp >= Date.now() - Number(months) * 30.44 * DAY_MS);
   if (!pts.length) pts = ws.slice(-1);
   const kgs = pts.map(p => p.kg);
-  let lo = Math.min(WEIGHT_IDEAL[0], ...kgs) - 1, hi = Math.max(WEIGHT_IDEAL[1], ...kgs) + 1;
+  const meta = weightMeta();
+  let lo = Math.min(WEIGHT_IDEAL[0], ...kgs, meta || Infinity) - 1, hi = Math.max(WEIGHT_IDEAL[1], ...kgs, meta || 0) + 1;
   const step = hi - lo <= 9 ? 2 : hi - lo <= 18 ? 3 : 5;
   lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
   const one = pts.length === 1;
@@ -4370,6 +4402,8 @@ function weightChartSVG(ws, months, W) {
   const by = y(WEIGHT_IDEAL[1]), bh = y(WEIGHT_IDEAL[0]) - by;
   g += '<rect x="' + padL + '" y="' + by + '" width="' + (W - padL - padR) + '" height="' + bh + '" rx="8" class="wc-band"/>' +
     '<text x="' + (padL + 8) + '" y="' + (y(WEIGHT_IDEAL[0]) - 7) + '" class="wc-band-t">ideal ' + WEIGHT_IDEAL[0] + '–' + WEIGHT_IDEAL[1] + ' kg</text>';
+  if (meta) g += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(meta) + '" y2="' + y(meta) + '" class="wc-meta"/>' +
+    '<text x="' + (W - padR) + '" y="' + (y(meta) + 14) + '" text-anchor="end" class="wc-meta-t">meta ' + fmtKg1(meta).replace(',0', '') + ' kg</text>';
   if (!one) g += '<polyline points="' + pts.map(p => x(p.timestamp).toFixed(1) + ',' + y(p.kg).toFixed(1)).join(' ') + '" class="wc-line"/>';
   pts.forEach((p, i) => {
     const last = i === pts.length - 1;
@@ -4401,12 +4435,16 @@ function renderWeight() {
     document.getElementById('wtHistory').innerHTML = '';
     return;
   }
-  const st = weightStatus(w.last.kg);
+  const meta = weightMeta();
+  const st = meta ? (w.last.kg > meta ? 'high' : 'ok') : weightStatus(w.last.kg);
   hero.dataset.st = st;
   document.getElementById('wtNum').innerHTML = fmtKg1(w.last.kg) + '<small>kg</small>';
   document.getElementById('wtSub').innerHTML = fmtDayShort(w.last.timestamp) + (w.last.who ? ' · ' + whoHTML(w.last.who) + ' ' + w.last.who : '');
   pill.hidden = false;
-  pill.textContent = st === 'ok' ? 'En su rango ideal' : (st === 'high' ? 'Por encima' : 'Por debajo') + ' del ideal (' + WEIGHT_IDEAL[0] + '–' + WEIGHT_IDEAL[1] + ' kg)';
+  const kgTxt = v => fmtKg1(v).replace(',0', '') + ' kg';
+  pill.innerHTML = (meta
+    ? (w.last.kg > meta ? 'Meta ' + kgTxt(meta) + ' · faltan ' + fmtKg1(Math.round((w.last.kg - meta) * 10) / 10) + ' kg' : '¡Meta cumplida! (' + kgTxt(meta) + ')')
+    : st === 'ok' ? 'En su rango ideal' : (st === 'high' ? 'Por encima' : 'Por debajo') + ' del ideal (' + WEIGHT_IDEAL[0] + '–' + WEIGHT_IDEAL[1] + ' kg)') + ' <b>›</b>';
 
   const wrap = document.getElementById('wtChart');
   const Wd = Math.round(wrap.clientWidth) || 330;
@@ -4631,6 +4669,34 @@ document.getElementById('wtHistory').addEventListener('click', e => {
   const ev = state.health.find(x => x.id === r.dataset.id); if (ev) openHEdit(ev);
 });
 document.getElementById('btnWeightAdd').addEventListener('click', () => openHEdit(null));
+// ---- Meta de peso
+function metaInfo() {
+  const v = parseFloat(String(document.getElementById('metaKg').value).replace(',', '.'));
+  const last = weightCalc().last;
+  document.getElementById('metaInfo').textContent = v > 0 && last
+    ? (last.kg > v ? 'Faltan ' + fmtKg1(Math.round((last.kg - v) * 10) / 10) + ' kg desde el último pesaje (' + fmtKg1(last.kg) + ' kg)' : 'Ya está en la meta con ' + fmtKg1(last.kg) + ' kg')
+    : 'El rango ideal sigue siendo ' + WEIGHT_IDEAL[0] + '–' + WEIGHT_IDEAL[1] + ' kg';
+}
+document.getElementById('wtPill').addEventListener('click', () => {
+  const m = weightMeta();
+  document.getElementById('metaKg').value = m ? fmtKg1(m).replace(',0', '') : '';
+  document.getElementById('btnMetaClear').style.display = m ? '' : 'none';
+  metaInfo();
+  openModal('modalMeta');
+});
+document.getElementById('metaKg').addEventListener('input', metaInfo);
+document.getElementById('btnMetaConfirm').addEventListener('click', () => {
+  const v = parseFloat(String(document.getElementById('metaKg').value).replace(',', '.'));
+  if (!v || v < 1 || v > 99) { showToast('Poné la meta en kg'); return; }
+  closeModal('modalMeta');
+  if (v === weightMeta()) return;
+  addHealth({ id: newHealthId(), timestamp: Date.now(), type: 'meta-peso', value: String(Math.round(v * 10) / 10), who: state.currentUser || '' },
+    'Meta: ' + fmtKg1(v).replace(',0', '') + ' kg', 'balanza');
+});
+document.getElementById('btnMetaClear').addEventListener('click', () => {
+  closeModal('modalMeta');
+  addHealth({ id: newHealthId(), timestamp: Date.now(), type: 'meta-peso', value: '', who: state.currentUser || '' }, 'Meta sacada');
+});
 document.getElementById('wtRange').addEventListener('click', e => {
   const b = e.target.closest('[data-m]'); if (!b) return;
   wtMonths = b.dataset.m;
